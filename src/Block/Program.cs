@@ -2,15 +2,25 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.ComponentModel;
 using System.Linq;
 
 namespace ValueCollections
 {
-    public readonly struct Block<T> : 
-        IReadOnlyList<T>, 
-        IEquatable<Block<T>>
+    /// <inheritdoc/>
+    /// <summary>
+    /// An immutable array with value equality. <see href="https://github.com/asik/ValueCollections#readme"/>
+    /// </summary>
+    /// <remarks>
+    /// Usage remarks: do not use as an ICollection(T); this interface is only implemented to support deserialization.
+    /// </remarks>
+    public struct Block<T> :
+        IReadOnlyList<T>,
+        IEquatable<Block<T>>,
+        ICollection<T> // This is only for Deserialization support
     {
-        readonly ImmutableArray<T> _arr;
+        // Not readonly for deserialization, see ICollection implementation.
+        ImmutableArray<T> _arr;
 
         public Block(IEnumerable<T> elems) =>
             // ImmutableArray is smart enough to check if it's a finite collection and pre-allocate if possible,
@@ -33,17 +43,32 @@ namespace ValueCollections
 
         #region ImmutableArray interface
 
+        /// <summary>
+        /// Gets an empty immutable array.
+        /// </summary>
         public static readonly Block<T> Empty = new Block<T>(ImmutableArray<T>.Empty);
 
+        /// <summary>
+        /// Gets the number of elements in the array.
+        /// </summary>
         public int Length =>
             _arr.Length;
 
+        /// <summary>
+        /// Gets a value indicating whether this struct was initialized without an actual array instance.
+        /// </summary>
         public bool IsDefault =>
             _arr.IsDefault;
 
+        /// <summary>
+        /// Gets a value indicating whether this struct is empty or uninitialized.
+        /// </summary>
         public bool IsDefaultOrEmpty =>
             _arr.IsDefaultOrEmpty;
 
+        /// <summary>
+        /// Gets a value indicating whether this collection is empty.
+        /// </summary>
         public bool IsEmpty =>
             _arr.IsEmpty;
 
@@ -75,14 +100,68 @@ namespace ValueCollections
 
         public int Count =>
             _arr.Length;
+
+        /// <summary>
+        /// Returns an enumerator for the contents of the array.
+        /// </summary>
+        /// <returns>An enumerator.</returns>
         public ImmutableArray<T>.Enumerator GetEnumerator() =>
             _arr.GetEnumerator();
 
+        /// <summary>
+        /// Returns an enumerator for the contents of the array.
+        /// </summary>
+        /// <returns>An enumerator.</returns>
+        /// <exception cref="InvalidOperationException">Thrown if the <see cref="IsDefault"/> property returns true.</exception>
         IEnumerator IEnumerable.GetEnumerator() =>
             _arr.AsEnumerable().GetEnumerator();
 
+        /// <summary>
+        /// Returns an enumerator for the contents of the array.
+        /// </summary>
+        /// <returns>An enumerator.</returns>
+        /// <exception cref="InvalidOperationException">Thrown if the <see cref="IsDefault"/> property returns true.</exception>
         IEnumerator<T> IEnumerable<T>.GetEnumerator() =>
             _arr.AsEnumerable().GetEnumerator();
+
+        #endregion
+
+        #region ICollection<T>
+
+        /// <summary>
+        /// The only extension point for collections in System.Text.Json is to allow adding elements via ICollection.Add,
+        /// and we also must lie about being read-only. This effectively makes our type mutable by casting it to ICollection.
+        /// We can at least make this less discoverable and trigger an error if it's used directly on the type.
+        /// https://github.com/dotnet/runtime/issues/67361
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("For internal use only.", true)]        
+        public bool IsReadOnly => false; 
+
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("For internal use only.", true)]
+        public void Add(T item) => 
+            _arr = _arr.IsDefault ? ImmutableArray.Create(item) : _arr.Add(item);
+
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("For internal use only.", true)]
+        public void Clear() => 
+            throw new NotSupportedException();
+
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("For internal use only.", true)]
+        public bool Contains(T item) =>
+            throw new NotSupportedException();
+
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("For internal use only.", true)]
+        public void CopyTo(T[] array, int arrayIndex) =>
+            throw new NotSupportedException();
+
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("For internal use only.", true)]
+        public bool Remove(T item) => 
+            throw new NotSupportedException();
 
         #endregion
 

@@ -4,6 +4,7 @@ using ValueCollections;
 using Xunit;
 
 namespace Tests;
+
 public class EqualityTests
 {
     [Fact]
@@ -23,6 +24,10 @@ public class EqualityTests
         var block2 = Block.Create(1, 2, 3);
         Assert.True(block.Equals(block2));
     }
+
+    [Fact]
+    void IEquatableUninitialized() => 
+        Assert.True(new Block<int>().Equals(new Block<int>()));
 
     [Fact]
     void ObjectEquals()

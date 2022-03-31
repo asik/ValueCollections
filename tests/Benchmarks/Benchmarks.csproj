@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Block\Block.csproj" />
+    <ProjectReference Include="..\..\src\Block\ValueCollections.Block.csproj" />
   </ItemGroup>
 
 </Project>

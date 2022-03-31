@@ -7,12 +7,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		.gitignore = .gitignore
+		LICENSE = LICENSE
 		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A4CA4B42-876B-40C1-BE9D-3C740D89CDAF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Block", "src\Block\Block.csproj", "{7FA6E721-18CD-43D9-808F-33363E0A902D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ValueCollections.Block", "src\Block\ValueCollections.Block.csproj", "{7FA6E721-18CD-43D9-808F-33363E0A902D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{38CD407C-1DA2-4E4E-B57A-F592F26F61A3}"
 EndProject
