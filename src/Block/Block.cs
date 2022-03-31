@@ -2,8 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.ComponentModel;
 using System.Linq;
+using System.Text.Json.Serialization;
+using ValueCollections.Json;
 
 namespace ValueCollections
 {
@@ -11,16 +12,24 @@ namespace ValueCollections
     /// <summary>
     /// An immutable array with value equality. <see href="https://github.com/asik/ValueCollections#readme"/>
     /// </summary>
-    /// <remarks>
-    /// Usage remarks: do not use as an ICollection(T); this interface is only implemented to support deserialization.
-    /// </remarks>
-    public struct Block<T> :
+    [JsonConverter(typeof(BlockJsonConverterFactory))]
+    public readonly struct Block<T> :
         IReadOnlyList<T>,
-        IEquatable<Block<T>>,
-        ICollection<T> // This is only for Deserialization support
+        IEquatable<Block<T>>
     {
-        // Not readonly for deserialization, see ICollection implementation.
-        ImmutableArray<T> _arr;
+        // Should we be based on ImmutableArray or ImmutableList? After all, we're going to support IImmutableList,
+        // and ImmutableList is a better type for that purpose, optimized for adding/removing.
+        // Why select a type that's going to be slow on updates if we want to support updates?
+        // Rationale: if update performance is important, are you going to be happy with ImmutableList?
+        // Or are you going to choose List<T> or T[] or something imperative.
+        // I think the vast majority of use cases for this type will be simple updates where a single array allocation is fine.
+        // For lots of updates where perf matters, you can use something mutable.
+        // Advantages of ImmutableArray that we would lose by going to ImmutableList:
+        // - Consistency with planned F# Block type
+        // - Array-like performance in creation, iteration
+        // - 0 GC overhead over the underlying array (less overhead than List<T>!)
+        // 
+        readonly ImmutableArray<T> _arr;
 
         public Block(IEnumerable<T> elems) =>
             // ImmutableArray is smart enough to check if it's a finite collection and pre-allocate if possible,
@@ -34,10 +43,13 @@ namespace ValueCollections
         // Further optimizations: add single, two, three-element constructors for perf.
         // Add support for IImmutableList
         // Add overloads for LINQ
-        // See if equality perf via IStructuralEquatable is ok
+        // Performance work:
+        // - is equality via IStructuralEquatable ok? Can we do better when T: IEquatable<T>?
+        // - can we improve serialization/deserialization perf with a constructor for BlockJsonConverter that takes in JsonSerializerOptions?
+        //   https://makolyte.com/dotnet-jsonserializer-is-over-200x-faster-if-you-reuse-jsonserializeroptions/
         // Questionable interfaces:
-        // - ICollection - for legacy stuff, it's not really an issue to implement though
-        // - IList - for legacy stuff, but would violate LSP. ImmutableArray does it. Should we?
+        // - ICollection - this is a terrible interface. We don't need it to support System.Text.Json. Any real need to support it?
+        // - IList - for mutable indexable collections e.g. System.Collections.Generic.List. Makes 0 sense for us.
         // - IStructuralEquality - do we need this if we're already structurally comparable via IEquatable?
         // - IStructuralComparable - does it really make sense to order arrays? What's the use case? OrderedSet? F# does it though.
 
@@ -126,44 +138,6 @@ namespace ValueCollections
 
         #endregion
 
-        #region ICollection<T>
-
-        /// <summary>
-        /// The only extension point for collections in System.Text.Json is to allow adding elements via ICollection.Add,
-        /// and we also must lie about being read-only. This effectively makes our type mutable by casting it to ICollection.
-        /// We can at least make this less discoverable and trigger an error if it's used directly on the type.
-        /// https://github.com/dotnet/runtime/issues/67361
-        /// </summary>
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("For internal use only.", true)]        
-        public bool IsReadOnly => false; 
-
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("For internal use only.", true)]
-        public void Add(T item) => 
-            _arr = _arr.IsDefault ? ImmutableArray.Create(item) : _arr.Add(item);
-
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("For internal use only.", true)]
-        public void Clear() => 
-            throw new NotSupportedException();
-
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("For internal use only.", true)]
-        public bool Contains(T item) =>
-            throw new NotSupportedException();
-
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("For internal use only.", true)]
-        public void CopyTo(T[] array, int arrayIndex) =>
-            throw new NotSupportedException();
-
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("For internal use only.", true)]
-        public bool Remove(T item) => 
-            throw new NotSupportedException();
-
-        #endregion
 
         // The naive approach to comparison doesn't work, running into
         // System.ArgumentException : Object is not a array with the same number of elements as the array to compare it to.
