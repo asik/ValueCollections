@@ -8,14 +8,15 @@ using ValueCollections.Json;
 
 namespace ValueCollections
 {
-    /// <inheritdoc/>
+    /// <inheritdoc cref="System.Collections.Immutable.ImmutableArray{T}"/>
     /// <summary>
     /// An immutable array with value equality. <see href="https://github.com/asik/ValueCollections#readme"/>
     /// </summary>
     [JsonConverter(typeof(BlockJsonConverterFactory))]
-    public readonly struct Block<T> :
+    public partial class Block<T> :
         IReadOnlyList<T>,
-        IEquatable<Block<T>>
+        IEquatable<Block<T>>,
+        IImmutableList<T>
     {
         // Should we be based on ImmutableArray or ImmutableList? After all, we're going to support IImmutableList,
         // and ImmutableList is a better type for that purpose, optimized for adding/removing.
@@ -28,7 +29,25 @@ namespace ValueCollections
         // - Consistency with planned F# Block type
         // - Array-like performance in creation, iteration
         // - 0 GC overhead over the underlying array (less overhead than List<T>!)
-        // 
+
+        // So it should be based on ImmutableArray.
+
+        // Should it be a reference type or a value type?
+        // ImmutableArray is a value type. It does this because it is designed as a low-overhead alternative to
+        // ImmutableList. It's also unsafe, throwing InvalidOperationException/NullReferenceException
+        // when uninitialized. We could make every function go through an if statement to make it safe, but that would
+        // slow down usage.
+        // ImmutableArray exposes IsDefault, IsDefaultOrEmpty and IsEmpty. It needs all 3
+        // C# now has nullability checking for reference types, making them much safer than they used to be when
+        // ImmutableArray was designed. Since they allow us to control our initialization, we can be fast on usage.
+        // With nullability checking, reference type also offer a correctness advantage that structs lack: the compiler 
+        // warns if they're left uninitialized.
+        // However, making it a reference means two allocations per instance instead of one. This means using Block<T>
+        // creates more GC pressure, leading to more frequent GC. However, this is true of every collection type outside of
+        // plain arrays.
+
+        // Overall, making it a reference type is the better solution.
+
         readonly ImmutableArray<T> _arr;
 
         public Block(IEnumerable<T> elems) =>
@@ -39,6 +58,10 @@ namespace ValueCollections
         public Block(params T[] elems) =>
             // This is to support nice syntax like new Block<int>(1, 2, 3, 4, 5, 6)
             _arr = ImmutableArray.Create(elems);
+
+        Block(ImmutableArray<T> elems) =>
+            // For fast creation; mostly used internally
+            _arr = elems;
 
         // Further optimizations: add single, two, three-element constructors for perf.
         // Add support for IImmutableList
@@ -66,23 +89,8 @@ namespace ValueCollections
         public int Length =>
             _arr.Length;
 
-        /// <summary>
-        /// Gets a value indicating whether this struct was initialized without an actual array instance.
-        /// </summary>
-        public bool IsDefault =>
-            _arr.IsDefault;
-
-        /// <summary>
-        /// Gets a value indicating whether this struct is empty or uninitialized.
-        /// </summary>
-        public bool IsDefaultOrEmpty =>
-            _arr.IsDefaultOrEmpty;
-
-        /// <summary>
-        /// Gets a value indicating whether this collection is empty.
-        /// </summary>
-        public bool IsEmpty =>
-            _arr.IsEmpty;
+        // We do not support .IsDefault or IsDefaultOrEmpty because this is a reference type and does not support
+        // default initialization. Furthermore, IsEmpty seems pretty useless when other common array types do not have it.
 
         #endregion
 
@@ -138,6 +146,14 @@ namespace ValueCollections
 
         #endregion
 
+        /// <summary>
+        /// Provides support for range indexing in C# 8.0 and later.
+        /// Can also be called directly of course.
+        /// </summary>        
+        /// <param name="start">The index of the first element in the source array to include in the resulting array.</param>
+        /// <param name="length">The number of elements from the source array to include in the resulting array.</param>
+        public Block<T> Slice(int start, int length) =>
+            new Block<T>(ImmutableArray.Create(_arr, start, length));
 
         // The naive approach to comparison doesn't work, running into
         // System.ArgumentException : Object is not a array with the same number of elements as the array to compare it to.
@@ -149,6 +165,7 @@ namespace ValueCollections
 
         //public static bool operator >(Block<T> left, Block<T> right) =>
         //    left.CompareTo(right) > 0;
+
     }
 
     public static class Block
@@ -160,6 +177,6 @@ namespace ValueCollections
             new Block<T>(elems);
 
         public static Block<T> ToBlock<T>(this IEnumerable<T> elems) =>
-            CreateRange(elems);
+            new Block<T>(elems);
     }
 }

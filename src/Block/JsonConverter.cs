@@ -30,7 +30,9 @@ namespace ValueCollections.Json
                 reader.Read();
             }
 
-            return new Block<T>(list);
+            return list.Count > 0
+                ? new Block<T>(list)
+                : Block<T>.Empty;
         }
 
         public override void Write(Utf8JsonWriter writer, Block<T> value, JsonSerializerOptions options) =>

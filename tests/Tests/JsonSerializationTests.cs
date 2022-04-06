@@ -18,9 +18,25 @@ public class JsonSerializationTests
     }
 
     [Fact]
+    void CanSerializeAndDeserializeEmptyArray()
+    {
+        var serialized = JsonSerializer.Serialize(Block<int>.Empty);
+        var deserialized =
+            JsonSerializer.Deserialize<Block<int>>(serialized);
+
+        Assert.Equal(Block<int>.Empty, deserialized);
+    }
+
+    [Fact]
     void SerializesAsAJsonArray() => 
         Assert.Equal(
             "[1,2,3]", 
             JsonSerializer.Serialize(
                 Block.Create(1, 2, 3)));
+
+    [Fact]
+    void SerializesEmptyAsAnEmptyArray() =>
+        Assert.Equal(
+            "[]",
+            JsonSerializer.Serialize(Block<int>.Empty));
 }

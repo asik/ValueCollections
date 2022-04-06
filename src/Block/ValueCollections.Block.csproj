@@ -19,6 +19,7 @@
     <Version>0.0.1-alpha</Version>
 	<Title>ValueCollections.Block</Title>
 	<AssemblyName>$(MSBuildProjectName)</AssemblyName>
+	<OutputType>Exe</OutputType>
   </PropertyGroup>
 
   <ItemGroup>
