@@ -16,7 +16,7 @@
     <Description>Block is an immutable array type with structural equality.</Description>
     <Authors>André Slupik</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Version>0.0.1-alpha</Version>
+    <Version>0.0.2-alpha</Version>
 	<Title>ValueCollections.Block</Title>
 	<AssemblyName>$(MSBuildProjectName)</AssemblyName>
 	<OutputType>Exe</OutputType>
