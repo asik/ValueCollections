@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using ValueCollections;
 using Xunit;
 
@@ -111,6 +112,61 @@ public class EqualityTests
         Assert.False(set.Add(Block.Create(1, 2, 3)));
         Assert.True(set.Remove(Block.Create(1, 2, 3)));
         Assert.True(set.Add(Block.Create(1, 2, 3)));
+    }
+
+    enum MyEnum { A, B }
+    enum MyEnum2 { A, B }
+
+    [Fact]
+    void ThingsThatShouldBeEqual()
+    {
+        // Enums
+        Assert.Equal(
+            Block.Create(MyEnum.A, MyEnum.B),
+            Block.Create(MyEnum.A, MyEnum.B));
+
+        // strings
+        Assert.Equal(
+            Block.Create("a", "b", "c"),
+            Block.Create("a", "b", "c"));
+
+        // nulls of any kind
+        Assert.Equal(
+            Block.Create<object?>(null, null),
+            Block.Create<object?>(null, null));
+
+        // object references
+        var (obj0, obj1) = (new object(), new object());
+        Assert.Equal(
+            Block.Create(obj0, obj1),
+            Block.Create(obj0, obj1));
+
+        // Blocks themselves
+        Assert.Equal(
+            Block.Create(Block.Create(1, 2, 3), Block.Create(1, 2)),
+            Block.Create(Block.Create(1, 2, 3), Block.Create(1, 2)));
+    }
+
+    [Fact]
+    void ThingsThatShouldNotBeEqual()
+    {
+        // Enums of different types should not be equal even with same integral values
+        Assert.NotEqual(
+            Block.Create(MyEnum.A).Cast<object>(), 
+            Block.Create(MyEnum2.A).Cast<object>());
+
+        // Different number types are not equal even if they represent the same values
+        Assert.NotEqual(
+            Block.Create(3, 4, 5).Cast<object>(),
+            Block.Create<uint>(3, 4, 5).Cast<object>());
+
+        // Equality of types that don't implement IEquatable is reference equality
+        Assert.NotEqual(
+            Block.Create(new[] { new[] { 1, 2 } }),
+            Block.Create(new[] { new[] { 1, 2 } }));
+        Assert.NotEqual(
+            Block.Create(new object(), new object()),
+            Block.Create(new object(), new object()));
     }
 
     //[Fact]

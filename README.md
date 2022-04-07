@@ -82,3 +82,14 @@ We don't have the same goals. `Block` could be based on `ImmutableList`, in theo
 It's a thin wrapper around a T[], so you're basically paying one extra allocation. Array access and iteration is as fast as regular arrays.
 Any mutation will involve a full copy; that is O(n). For building up a collection, I would suggest `ImmutableList` for now, which is built to be very efficient at adding and removing elements. For memory-like access, `T[]` is still fine, but .NET also now has more specialized types like `Span` and `Memory`.
 
+## Questions that may become frequently asked
+### Can I customize equality with an `EqualityComparer` or a `StringComparison`?
+Not in general. This type is designed to work with the item's intrinsic equality.
+Custom equality should be provided by the type `T` of items you put it, by implementing `IEquable<T>` or otherwise overriding equality.
+That said, there are some methods in the `IImmutableList` explicit implementation that take one, they exist for compatibility.
+Reference types that don't override equality or provide it via IEquatable<T>
+will be compared by reference.
+
+### Can I use this on .NET Framework?
+Yes, provided you are using a .NET Standard 2.0 compatible version (4.6.2 and above, I believe.)
+Side note: you can use records on .NET Framework.
