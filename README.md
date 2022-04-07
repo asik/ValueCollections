@@ -1,4 +1,4 @@
-`Block` is an __immutable__ array type with __structural equality__. It is based on `System.Collections.Immutable.ImmutableArray`, a standard type in .NET.
+`Block` is an immutable array with value equality. It builds upon `ImmutableArray<T>`, a standard type in .NET.
 
 To install the [nuget package](https://www.nuget.org/packages/ValueCollections.Block):
 ```
@@ -67,7 +67,7 @@ Not every method is yet covered by unit tests. The design might still change.
 It's short and it's consistent with the equivalent [planned F# feature also based on `ImmutableArray`](https://github.com/fsharp/fslang-design/blob/main/RFCs/FS-1094-block.md).
 
 ### Why do we need this?
-Comparing objects for equality is common and it's becoming more common with record types. Unfortunately, all the collection types in .NET default to reference equality, which means they don't work in records.
+Comparing objects for equality is common and it's becoming more common with record types. Unfortunately, all collection types in .NET, including those in `ImmutableCollections`, default to reference equality, which means they don't work in records.
 
 ### Why should it be immutable?
 Anything that supports equality should be immutable, since it can be used as keys in dictionaries and maps. In a DDD sense, this type represents a value, not an entity.

@@ -8,7 +8,6 @@ using ValueCollections.Json;
 
 namespace ValueCollections
 {
-    /// <inheritdoc cref="System.Collections.Immutable.ImmutableArray{T}"/>
     /// <summary>
     /// An immutable array with value equality. <see href="https://github.com/asik/ValueCollections#readme"/>
     /// </summary>
@@ -50,18 +49,18 @@ namespace ValueCollections
 
         readonly ImmutableArray<T> _arr;
 
-        public Block(IEnumerable<T> elems) =>
+        public Block(IEnumerable<T> items) =>
             // ImmutableArray is smart enough to check if it's a finite collection and pre-allocate if possible,
             // so we don't need further overloads for collections.
-            _arr = ImmutableArray.CreateRange(elems);
+            _arr = ImmutableArray.CreateRange(items);
 
-        public Block(params T[] elems) =>
+        public Block(params T[] items) =>
             // This is to support nice syntax like new Block<int>(1, 2, 3, 4, 5, 6)
-            _arr = ImmutableArray.Create(elems);
+            _arr = ImmutableArray.Create(items);
 
-        Block(ImmutableArray<T> elems) =>
-            // For fast creation; mostly used internally
-            _arr = elems;
+        Block(ImmutableArray<T> items) =>
+            // For fast creation; used internally
+            _arr = items;
 
         // Further optimizations: add single, two, three-element constructors for perf.
         // Add support for IImmutableList
@@ -78,14 +77,10 @@ namespace ValueCollections
 
         #region ImmutableArray interface
 
-        /// <summary>
-        /// Gets an empty immutable array.
-        /// </summary>
+        /// <inheritdoc cref="ImmutableArray{T}.Empty"/>
         public static readonly Block<T> Empty = new Block<T>(ImmutableArray<T>.Empty);
-
-        /// <summary>
-        /// Gets the number of elements in the array.
-        /// </summary>
+        
+        /// <inheritdoc cref="ImmutableArray{T}.Length"/>
         public int Length =>
             _arr.Length;
 
@@ -132,7 +127,6 @@ namespace ValueCollections
         /// Returns an enumerator for the contents of the array.
         /// </summary>
         /// <returns>An enumerator.</returns>
-        /// <exception cref="InvalidOperationException">Thrown if the <see cref="IsDefault"/> property returns true.</exception>
         IEnumerator IEnumerable.GetEnumerator() =>
             _arr.AsEnumerable().GetEnumerator();
 
@@ -140,7 +134,6 @@ namespace ValueCollections
         /// Returns an enumerator for the contents of the array.
         /// </summary>
         /// <returns>An enumerator.</returns>
-        /// <exception cref="InvalidOperationException">Thrown if the <see cref="IsDefault"/> property returns true.</exception>
         IEnumerator<T> IEnumerable<T>.GetEnumerator() =>
             _arr.AsEnumerable().GetEnumerator();
 
@@ -148,7 +141,7 @@ namespace ValueCollections
 
         /// <summary>
         /// Provides support for range indexing in C# 8.0 and later.
-        /// Can also be called directly of course.
+        /// Can also be called directly.
         /// </summary>        
         /// <param name="start">The index of the first element in the source array to include in the resulting array.</param>
         /// <param name="length">The number of elements from the source array to include in the resulting array.</param>
@@ -168,15 +161,36 @@ namespace ValueCollections
 
     }
 
+    /// <summary>
+    /// A set of initialization methods for instances of <see cref="Block{T}"/>.
+    /// </summary>
     public static class Block
     {
-        public static Block<T> CreateRange<T>(IEnumerable<T> elems) =>
-            new Block<T>(elems);
+        /// <summary>
+        /// Creates a new <see cref="Block{T}"/> from a sequence of items.
+        /// </summary>
+        /// <typeparam name="T">The type of element stored in the array.</typeparam>
+        /// <param name="items">The elements to store in the array.</param>
+        /// <returns>A <see cref="Block{T}"/> containing the items provided.</returns>
+        public static Block<T> CreateRange<T>(IEnumerable<T> items) =>
+            new Block<T>(items);
 
-        public static Block<T> Create<T>(params T[] elems) =>
-            new Block<T>(elems);
+        /// <summary>
+        /// Creates a new <see cref="Block{T}"/> from an array of items.
+        /// </summary>
+        /// <typeparam name="T">The type of element stored in the array.</typeparam>
+        /// <param name="items">The elements to store in the array.</param>
+        /// <returns>A <see cref="Block{T}"/> containing the items provided.</returns>
+        public static Block<T> Create<T>(params T[] items) =>
+            new Block<T>(items);
 
-        public static Block<T> ToBlock<T>(this IEnumerable<T> elems) =>
-            new Block<T>(elems);
+        /// <summary>
+        /// Creates a new <see cref="Block{T}"/> from a sequence of items.
+        /// </summary>
+        /// <typeparam name="T">The type of element stored in the array.</typeparam>
+        /// <param name="items">The elements to store in the array.</param>
+        /// <returns>A <see cref="Block{T}"/> containing the items provided.</returns>
+        public static Block<T> ToBlock<T>(this IEnumerable<T> items) =>
+            new Block<T>(items);
     }
 }

@@ -100,6 +100,7 @@ namespace ValueCollections
 
         /// <summary>
         /// Searches for the last item that satisfies the given predicate. 
+        /// The predicate's arguments are the item and its index within the array.
         /// </summary>
         /// <param name="predicate">
         /// A function that takes in an item and its index, 
