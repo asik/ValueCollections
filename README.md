@@ -2,7 +2,7 @@
 
 To install the [nuget package](https://www.nuget.org/packages/ValueCollections.Block):
 ```
-dotnet add package ValueCollections.Block --version 0.0.2-alpha
+dotnet add package ValueCollections.Block
 ```
 
 Example usage:
