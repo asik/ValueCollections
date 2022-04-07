@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using ValueCollections;
 using Xunit;
@@ -46,5 +47,6 @@ public class CreationTests
         Assert.Equal(array[^2], block[^2]);
         Assert.Equal(array[1..^1], block[1..^1]);
         Assert.Equal(array[..^0], block[..^0]);
+        Assert.Throws<IndexOutOfRangeException>(() => array[^0]);
     }
 }
