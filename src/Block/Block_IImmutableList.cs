@@ -132,7 +132,7 @@ namespace ValueCollections
         public Block<T> Append(IEnumerable<T> items) => 
             new Block<T>(_arr.AddRange(items));
 
-        /// <inheritdoc cref="ImmutableArray{T}.AddRange(ImmutableArray{T}))"/>
+        /// <inheritdoc cref="ImmutableArray{T}.AddRange(ImmutableArray{T})"/>
         public Block<T> Append(Block<T> items) =>
             new Block<T>(_arr.AddRange(items._arr));
 

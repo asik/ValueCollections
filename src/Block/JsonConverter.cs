@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 
 namespace ValueCollections.Json
 {
-    public class BlockJsonConverter<T> : JsonConverter<Block<T>>
+    class BlockJsonConverter<T> : JsonConverter<Block<T>>
     {
         public override Block<T> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
@@ -41,7 +41,7 @@ namespace ValueCollections.Json
             JsonSerializer.Serialize(writer, value as IEnumerable<T>, options);
     }
 
-    public class BlockJsonConverterFactory : JsonConverterFactory
+    class BlockJsonConverterFactory : JsonConverterFactory
     {
         // If I try and stick [JsonConverter(typeof(BlockJsonConverter<>)] on Block<T> directly,
         // that just doesn't work, System.Text.Json doesn't like it. The pattern for generic types
@@ -50,10 +50,12 @@ namespace ValueCollections.Json
         // so everything automagically works for users.
         // https://docs.microsoft.com/en-us/dotnet/standard/serialization/system-text-json-converters-how-to?pivots=dotnet-6-0#support-round-trip-for-stackt
 
+        /// <inheritdoc />
         public override bool CanConvert(Type typeToConvert) =>
             typeToConvert.IsGenericType
             && typeToConvert.GetGenericTypeDefinition() == typeof(Block<>);
 
+        /// <inheritdoc />
         public override JsonConverter CreateConverter(Type typeToConvert, JsonSerializerOptions options) =>
             (JsonConverter)Activator.CreateInstance(
                 typeof(BlockJsonConverter<>)

@@ -49,11 +49,19 @@ namespace ValueCollections
 
         readonly ImmutableArray<T> _arr;
 
+        /// <summary>
+        /// Creates a new <see cref="Block{T}"/> from a sequence of items.
+        /// </summary>
+        /// <param name="items">The elements to store in the array.</param>
         public Block(IEnumerable<T> items) =>
             // ImmutableArray is smart enough to check if it's a finite collection and pre-allocate if possible,
             // so we don't need further overloads for collections.
             _arr = ImmutableArray.CreateRange(items);
 
+        /// <summary>
+        /// Creates a new <see cref="Block{T}"/> from an array of items.
+        /// </summary>
+        /// <param name="items">The elements to store in the array.</param>
         public Block(params T[] items) =>
             // This is to support nice syntax like new Block<int>(1, 2, 3, 4, 5, 6)
             _arr = ImmutableArray.Create(items);
@@ -91,18 +99,23 @@ namespace ValueCollections
 
         #region IEquatable<T>
 
+        /// <inheritdoc />
         public bool Equals(Block<T> other) =>
             ((IStructuralEquatable)_arr).Equals(other._arr, EqualityComparer<T>.Default);
 
+        /// <inheritdoc />
         public override bool Equals(object obj) =>
             obj is Block<T> other && Equals(other);
 
+        /// <inheritdoc />
         public override int GetHashCode() =>
             ((IStructuralEquatable)_arr).GetHashCode(EqualityComparer<T>.Default);
 
+        /// <inheritdoc />
         public static bool operator ==(Block<T> left, Block<T> right) =>
             left.Equals(right);
 
+        /// <inheritdoc />
         public static bool operator !=(Block<T> left, Block<T> right) =>
             !left.Equals(right);
 
@@ -110,9 +123,11 @@ namespace ValueCollections
 
         #region IReadOnlyList<T>
 
+        /// <inheritdoc />
         public T this[int index] =>
             _arr[index];
 
+        /// <inheritdoc />
         public int Count =>
             _arr.Length;
 
