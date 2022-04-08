@@ -100,9 +100,39 @@ public partial class Block<T> :
 
     #region IEquatable<T>
 
+    static readonly EqualityComparer<T> _comparer = EqualityComparer<T>.Default;
+
     /// <inheritdoc />
-    public bool Equals(Block<T> other) =>
-        ((IStructuralEquatable)_arr).Equals(other._arr, EqualityComparer<T>.Default);
+    public bool Equals(Block<T> other)
+    {
+        // Equality via IStructuralEquatable appears to box every single element. What a shame.
+        // We can do 57X faster and avoid all allocations like this.
+        // Note that _arr.SequenceEquals(other._arr) is a very similar implementation to this but seemed about 30% slower.
+        if (other is null)
+        {
+            return false;
+        }
+
+        var otherArray = other._arr;
+        if (otherArray.Length != _arr.Length)
+        {
+            return false;
+        }
+
+        // Doing two optimizations here, both result in measurably faster code:
+        // We cache EqualityComparer<T>.Default in our own static field
+        // We copy that static field into a local here because local variable access is faster
+        var comparer = _comparer;
+        for (var i = 0; i < _arr.Length; ++i)
+        {
+            if (!comparer.Equals(_arr[i], otherArray[i]))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
 
     /// <inheritdoc />
     public override bool Equals(object obj) =>
