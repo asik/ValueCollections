@@ -21,7 +21,15 @@ public partial class Block<T>
     // RemoveAll has an optimization where it builds a set of indices to remove, then it's able to allocate a single result array.
     // Seems only useful for arrays of structs. Should benchmark it on general cases vs .Where().ToBlock().
 
-    // 
+
+    /// <summary>
+    /// Provides support for range indexing in C# 8.0 and later.
+    /// Can also be called directly.
+    /// </summary>        
+    /// <param name="start">The index of the first element in the source array to include in the resulting array.</param>
+    /// <param name="length">The number of elements from the source array to include in the resulting array.</param>
+    public Block<T> Slice(int start, int length) =>
+        new(ImmutableArray.Create(_arr, start, length));
 
     /// <inheritdoc cref="ImmutableArray{T}.Add(T)"/>
     public Block<T> Append(T item) =>

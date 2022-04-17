@@ -54,22 +54,18 @@ public partial class Block<T> :
     /// Creates a new <see cref="Block{T}"/> from a sequence of items.
     /// </summary>
     /// <param name="items">The elements to store in the array.</param>
-    public Block(IEnumerable<T> items)
-    {
+    public Block(IEnumerable<T> items) =>
         // ImmutableArray is smart enough to check if it's a finite collection and pre-allocate if possible,
         // so we don't need further overloads for collections.
         _arr = ImmutableArray.CreateRange(items);
-    }
 
     /// <summary>
     /// Creates a new <see cref="Block{T}"/> from an array of items.
     /// </summary>
     /// <param name="items">The elements to store in the array.</param>
-    public Block(params T[] items)
-    {
+    public Block(params T[] items) =>
         // This is to support nice syntax like new Block<int>(1, 2, 3, 4, 5, 6)
         _arr = ImmutableArray.Create(items);
-    }
 
     /// <summary>
     /// Creates a new <see cref="Block{T}"/> from an <see cref="ImmutableArray{T}"/>.
@@ -78,10 +74,8 @@ public partial class Block<T> :
     /// to build an array dynamically without an extra copy at the end to generate the <see cref="Block{T}"/>.
     /// </summary>
     /// <param name="items">The elements to store in the array.</param>
-    public Block(ImmutableArray<T> items)
-    {
+    public Block(ImmutableArray<T> items) =>
         _arr = items;
-    }
 
     // Further optimizations: add single, two, three-element constructors for perf.
     // Add support for IImmutableList
@@ -95,8 +89,6 @@ public partial class Block<T> :
     // - IStructuralEquality - do we need this if we're already structurally comparable via IEquatable?
     // - IStructuralComparable - does it really make sense to order arrays? What's the use case? OrderedSet? F# does it though.
 
-    #region ImmutableArray interface
-
     /// <inheritdoc cref="ImmutableArray{T}.Empty"/>
     public static readonly Block<T> Empty =
         new(ImmutableArray<T>.Empty);
@@ -107,8 +99,6 @@ public partial class Block<T> :
 
     // We do not support .IsDefault or IsDefaultOrEmpty because this is a reference type and does not support
     // default initialization. Furthermore, IsEmpty seems pretty useless when other common array types do not have it.
-
-    #endregion
 
     #region IEquatable<T>
 
@@ -218,15 +208,6 @@ public partial class Block<T> :
         _arr.AsEnumerable().GetEnumerator();
 
     #endregion
-
-    /// <summary>
-    /// Provides support for range indexing in C# 8.0 and later.
-    /// Can also be called directly.
-    /// </summary>        
-    /// <param name="start">The index of the first element in the source array to include in the resulting array.</param>
-    /// <param name="length">The number of elements from the source array to include in the resulting array.</param>
-    public Block<T> Slice(int start, int length) =>
-        new(ImmutableArray.Create(_arr, start, length));
 }
 
 /// <summary>
