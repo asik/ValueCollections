@@ -6,6 +6,7 @@ namespace Tests;
 
 public class JsonSerializationTests
 {
+
     [Fact]
     void CanSerializeAndDeserializeBackOutOfTheBox()
     {
@@ -13,6 +14,24 @@ public class JsonSerializationTests
         var serialized = JsonSerializer.Serialize(original);
         var deserialized =
             JsonSerializer.Deserialize<Block<int>>(serialized);
+
+        Assert.Equal(original, deserialized);
+    }
+
+    record InnerType(string A);
+    record ComplexType(string A, int B, Block<InnerType> Inner);
+
+    [Fact]
+    void CanSerializeAndDeserializeComplexType()
+    {
+        var original = new ComplexType(
+            A: "abc",
+            B: 3,
+            Inner: new Block<InnerType>(new InnerType("w"), new InnerType("h")));
+
+        var serialized = JsonSerializer.Serialize(original);
+        var deserialized =
+            JsonSerializer.Deserialize<ComplexType>(serialized);
 
         Assert.Equal(original, deserialized);
     }
@@ -28,9 +47,9 @@ public class JsonSerializationTests
     }
 
     [Fact]
-    void SerializesAsAJsonArray() => 
+    void SerializesAsAJsonArray() =>
         Assert.Equal(
-            "[1,2,3]", 
+            "[1,2,3]",
             JsonSerializer.Serialize(
                 Block.Create(1, 2, 3)));
 

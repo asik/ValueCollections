@@ -6,21 +6,18 @@ namespace Benchmarks;
 [MemoryDiagnoser]
 public class BlockBenchmarks
 {
-    const int largeSize = 100000;
-    readonly Block<int> largeIntBlock = Enumerable.Range(0, largeSize).ToBlock();
-    readonly Block<int> largeIntBlockCopy = Enumerable.Range(0, largeSize).ToBlock();
-    readonly int[] largeIntArray = Enumerable.Range(0, largeSize).ToArray();
-    readonly int[] largeIntArrayCopy = Enumerable.Range(0, largeSize).ToArray();
-
-    readonly Block<string> largeStringBlock = Enumerable.Range(0, largeSize).Select(i => i.ToString()).ToBlock();
-    readonly Block<string> largeStringBlockCopy = Enumerable.Range(0, largeSize).Select(i => i.ToString()).ToBlock();
-    readonly string[] largeStringArray = Enumerable.Range(0, largeSize).Select(i => i.ToString()).ToArray();
-    readonly string[] largeStringArrayCopy = Enumerable.Range(0, largeSize).Select(i => i.ToString()).ToArray();
-
-
-    readonly Block<int> blockCopy = new(1, 2, 3);
-    readonly List<int> sourceList = new() { 1, 2, 3 };
-    readonly int[] sourceArray = new[] { 1, 2, 3 };
+    private const int largeSize = 100000;
+    private readonly Block<int> largeIntBlock = Enumerable.Range(0, largeSize).ToBlock();
+    private readonly Block<int> largeIntBlockCopy = Enumerable.Range(0, largeSize).ToBlock();
+    private readonly int[] largeIntArray = Enumerable.Range(0, largeSize).ToArray();
+    private readonly int[] largeIntArrayCopy = Enumerable.Range(0, largeSize).ToArray();
+    private readonly Block<string> largeStringBlock = Enumerable.Range(0, largeSize).Select(i => i.ToString()).ToBlock();
+    private readonly Block<string> largeStringBlockCopy = Enumerable.Range(0, largeSize).Select(i => i.ToString()).ToBlock();
+    private readonly string[] largeStringArray = Enumerable.Range(0, largeSize).Select(i => i.ToString()).ToArray();
+    private readonly string[] largeStringArrayCopy = Enumerable.Range(0, largeSize).Select(i => i.ToString()).ToArray();
+    private readonly Block<int> blockCopy = new(1, 2, 3);
+    private readonly List<int> sourceList = new() { 1, 2, 3 };
+    private readonly int[] sourceArray = new[] { 1, 2, 3 };
 
     //[Benchmark]
     //public Block<int> ConstructorFromArray() => 
@@ -98,5 +95,19 @@ public class BlockBenchmarks
     this makes it 10 times faster in that case. However, to support this, we'd have to implement Block<T> on top
     of T[] directly which is a lot more work. As it stands, Block<T> equality is generally on par or better than
     SequenceEquals, so other things will take priority over a total rewrite to get that memcmp optimization.
+
+    Some results for HashCode:
+
+|                                Method |             Mean |          Error |         StdDev |            Median | Allocated |
+|-------------------------------------- |-----------------:|---------------:|---------------:|------------------:|----------:|
+|                          GetHashCode_ | 1,341,724.938 ns | 26,772.8537 ns | 75,073.9520 ns | 1,356,153.9062 ns |       1 B |
+| GetHashCodeNoStaticAccessOptimization |   870,717.506 ns | 17,348.2829 ns | 41,230.0299 ns |   883,716.2598 ns |         - |
+| GetHashCodeCallingGetHashCodeManually | 1,018,821.900 ns | 26,986.0200 ns | 76,992.6300 ns |                           1 B |
+|       GetHashCodeIStructuralEquatable |       201.600 ns |      4.0600 ns |     11.6500 ns |                             - |
+
+    So passing in EqualityComparer<T>.Default slows it down.
+    Calling GetHashCode and passing it to HashCode.Add is also slower than letting HashCode do it.
+    IStructuralEquatable is fast but it's also cheating, it only looks at the last 8 elements.
+
     */
 }

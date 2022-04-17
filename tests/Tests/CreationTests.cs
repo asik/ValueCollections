@@ -9,7 +9,7 @@ namespace Tests;
 public class CreationTests
 {
     [Fact]
-    void ConstructorFromEnumerable() => 
+    void ConstructorFromEnumerable() =>
         Assert.Equal(
             Block.Create(1, 2, 3),
             new Block<int>(Enumerable.Range(1, 3)));
@@ -37,6 +37,12 @@ public class CreationTests
         Assert.Equal(
             Block.Create(1, 2, 3),
             Block.CreateRange(new List<int> { 1, 2, 3 }));
+
+    [Fact]
+    void ToBlock() =>
+        Assert.Equal(
+            Block.Create(0, 1, 2, 3, 4, 5, 6, 7),
+            Enumerable.Range(0, 8).ToBlock());
 
     [Fact]
     void RangesAndSlices()

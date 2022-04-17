@@ -2,3 +2,8 @@
 
 # IDE0051: Remove unused private members
 dotnet_diagnostic.IDE0051.severity = none
+
+dotnet_style_require_accessibility_modifiers = omit_if_default:suggestion
+
+csharp_style_expression_bodied_methods = true 
+csharp_style_expression_bodied_operators = true

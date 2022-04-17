@@ -16,8 +16,8 @@ public partial class Block<T>
 
     /// <inheritdoc cref="ImmutableArray{T}.IndexOf(T)"/>
     public int IndexOf(T item) =>
-        _arr.IndexOf(item);        
-    
+        _arr.IndexOf(item);
+
     /// <inheritdoc cref="ImmutableArray{T}.LastIndexOf(T)"/>
     public int LastIndexOf(T item) =>
         _arr.LastIndexOf(item);
@@ -124,37 +124,7 @@ public partial class Block<T>
         return -1;
     }
 
-    /// <inheritdoc cref="ImmutableArray{T}.Add(T)"/>
-    public Block<T> Append(T item) =>
-        new(_arr.Add(item));
 
-    /// <inheritdoc cref="ImmutableArray{T}.AddRange(IEnumerable{T})"/>
-    public Block<T> Append(IEnumerable<T> items) => 
-        new(_arr.AddRange(items));
-
-    /// <inheritdoc cref="ImmutableArray{T}.AddRange(ImmutableArray{T})"/>
-    public Block<T> Append(Block<T> items) =>
-        new(_arr.AddRange(items._arr));
-
-    /// <inheritdoc cref="ImmutableArray{T}.Insert(int, T)"/>
-    public Block<T> Insert(int index, T item) =>
-        new(_arr.Insert(index, item));
-
-    /// <inheritdoc cref="ImmutableArray{T}.InsertRange(int, IEnumerable{T})"/>
-    public Block<T> Insert(int index, IEnumerable<T> items) =>
-        new(_arr.InsertRange(index, items));
-
-    /// <inheritdoc cref="ImmutableArray{T}.InsertRange(int, ImmutableArray{T})"/>
-    public Block<T> Insert(int index, Block<T> items) =>
-        new(_arr.InsertRange(index, items._arr));
-
-    /// <inheritdoc cref="ImmutableArray{T}.RemoveAt(int)"/>
-    public Block<T> RemoveAt(int index) =>
-        new(_arr.RemoveAt(index));
-
-    /// <inheritdoc cref="ImmutableArray{T}.SetItem(int, T)"/>
-    public Block<T> SetItem(int index, T item) =>
-        new(_arr.SetItem(index, item));
 
     // Explicit implementations
 
@@ -166,12 +136,12 @@ public partial class Block<T>
 
     IImmutableList<T> IImmutableList<T>.AddRange(IEnumerable<T> items) =>
         Append(items);
-    
+
     IImmutableList<T> IImmutableList<T>.Insert(int index, T element) =>
         Insert(index, element);
 
     IImmutableList<T> IImmutableList<T>.InsertRange(int index, IEnumerable<T> items) =>
-        Insert(index, items);        
+        Insert(index, items);
 
     IImmutableList<T> IImmutableList<T>.Remove(T value, IEqualityComparer<T> equalityComparer) =>
         new Block<T>(_arr.Remove(value, equalityComparer));
@@ -186,7 +156,7 @@ public partial class Block<T>
         new Block<T>(_arr.RemoveRange(index, count));
 
     IImmutableList<T> IImmutableList<T>.RemoveAt(int index) =>
-        new Block<T>(_arr.RemoveAt(index));
+        RemoveAt(index);
 
     IImmutableList<T> IImmutableList<T>.SetItem(int index, T value) =>
         SetItem(index, value);

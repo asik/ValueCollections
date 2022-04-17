@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using ValueCollections;
@@ -9,29 +10,37 @@ namespace Tests;
 
 public class ImmutableArrayInterfaceTests
 {
-    readonly Block<int> defaultInstance = new();
-    readonly Block<int> emptyInstance = Block<int>.Empty;
-    readonly Block<string> nonEmptyBlock = Block.Create("a", "b", "c");
-    readonly Block<string> emptyBlock = Block<string>.Empty;
+    private readonly Block<int> defaultInstance = new();
+    private readonly Block<int> emptyInstance = Block<int>.Empty;
+    private readonly Block<string> nonEmptyBlock = Block.Create("a", "b", "c");
+    private readonly Block<string> emptyBlock = Block<string>.Empty;
 
     [Fact]
-    void LengthDefault() =>
+    private void LengthDefault()
+    {
         Assert.Equal(0, defaultInstance.Length);
+    }
 
     [Fact]
-    void LengthEmpty() =>
+    private void LengthEmpty()
+    {
         Assert.Equal(0, emptyInstance.Length);
+    }
 
     [Fact]
-    void EmptyIsEmpty() =>
+    private void EmptyIsEmpty()
+    {
         Assert.Equal(Array.Empty<int>(), Block<int>.Empty);
+    }
 
     [Fact]
-    void EmptyIsSingleton() =>
+    private void EmptyIsSingleton()
+    {
         Assert.Same(Block<int>.Empty, Block<int>.Empty);
+    }
 
     [Fact]
-    void FindIndexi_NotFound()
+    private void FindIndexi_NotFound()
     {
         var source = Block.Create("a", "b", "b", "c");
         var expected = source.Select((item, i) => (item, i));
@@ -46,7 +55,7 @@ public class ImmutableArrayInterfaceTests
     }
 
     [Fact]
-    void FindIndexi_Found()
+    private void FindIndexi_Found()
     {
         var source = Block.Create("a", "b", "b", "c");
         var expected = new[] { ("a", 0), ("b", 1) };
@@ -61,7 +70,7 @@ public class ImmutableArrayInterfaceTests
     }
 
     [Fact]
-    void FindLastIndexi_NotFound()
+    private void FindLastIndexi_NotFound()
     {
         var source = Block.Create("a", "b", "b", "c");
         var expected = new[] { ("c", 3), ("b", 2), ("b", 1), ("a", 0) };
@@ -76,7 +85,7 @@ public class ImmutableArrayInterfaceTests
     }
 
     [Fact]
-    void FindLastIndexi_Found()
+    private void FindLastIndexi_Found()
     {
         var source = Block.Create("a", "b", "b", "c");
         var expected = new[] { ("c", 3), ("b", 2) };
@@ -91,7 +100,7 @@ public class ImmutableArrayInterfaceTests
     }
 
     [Fact]
-    void FindIndex_NotFound()
+    private void FindIndex_NotFound()
     {
         var source = Block.Create("a", "b", "b", "c");
         var expected = source.ToArray();
@@ -105,10 +114,18 @@ public class ImmutableArrayInterfaceTests
         Assert.Equal(-1, idx);
     }
 
+    private record A();
+
+    private record B() : A;
+
     [Fact]
-    void FindIndex_Found()
+    private void FindIndex_Found()
     {
         var source = Block.Create("a", "b", "b", "c");
+
+        var s = Block<A>.Empty;
+        var b = Block.Create("Hello");
+        ((IImmutableList<A>)s).AddRange(new[] { new B() });
         var expected = new[] { "a", "b" };
         var actual = new List<string>();
         var idx = source.FindIndex(item =>
@@ -121,7 +138,7 @@ public class ImmutableArrayInterfaceTests
     }
 
     [Fact]
-    void FindLastIndex_NotFound()
+    private void FindLastIndex_NotFound()
     {
         var source = Block.Create("a", "b", "b", "c");
         var expected = new[] { "c", "b", "b", "a" };
@@ -136,7 +153,7 @@ public class ImmutableArrayInterfaceTests
     }
 
     [Fact]
-    void FindLastIndex_Found()
+    private void FindLastIndex_Found()
     {
         var source = Block.Create("a", "b", "b", "c");
         var expected = new[] { "c", "b" };

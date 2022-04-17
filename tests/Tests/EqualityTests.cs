@@ -9,7 +9,7 @@ namespace Tests;
 public class EqualityTests
 {
     [Fact]
-    void XUnitEquality()
+    private void XUnitEquality()
     {
         // Plays well with XUnit's Assert.Equal
         var block = Block.Create(1, 2, 3);
@@ -19,7 +19,7 @@ public class EqualityTests
     }
 
     [Fact]
-    void IEquatableT()
+    private void IEquatableT()
     {
         var block = Block.Create(1, 2, 3);
         var block2 = Block.Create(1, 2, 3);
@@ -27,11 +27,13 @@ public class EqualityTests
     }
 
     [Fact]
-    void IEquatableUninitialized() => 
+    private void IEquatableUninitialized()
+    {
         Assert.True(new Block<int>().Equals(new Block<int>()));
+    }
 
     [Fact]
-    void ObjectEquals()
+    private void ObjectEquals()
     {
         var block = Block.Create(1, 2, 3);
         var block2 = Block.Create(1, 2, 3);
@@ -39,7 +41,7 @@ public class EqualityTests
     }
 
     [Fact]
-    void OperatorEquals()
+    private void OperatorEquals()
     {
         var block = Block.Create(1, 2, 3);
         var block2 = Block.Create(1, 2, 3);
@@ -47,17 +49,17 @@ public class EqualityTests
     }
 
     [Fact]
-    void OperatorNotEquals()
+    private void OperatorNotEquals()
     {
         var block = Block.Create(1, 2, 3);
         var block2 = Block.Create(1, 2);
         Assert.True(block != block2);
     }
 
-    record MyRecord(Block<string> Strings);
+    private record MyRecord(Block<string> Strings);
 
     [Fact]
-    void WorksWithRecords()
+    private void WorksWithRecords()
     {
         var r0 = new MyRecord(Block.Create("a", "b"));
         var r1 = new MyRecord(Block.Create("a", "b"));
@@ -67,7 +69,7 @@ public class EqualityTests
     }
 
     [Fact]
-    void WorksInDictionaries()
+    private void WorksInDictionaries()
     {
         var dict = new Dictionary<Block<int>, string>
         {
@@ -96,7 +98,7 @@ public class EqualityTests
 
     [Fact]
     [SuppressMessage("Assertions", "xUnit2017:Do not use Contains() to check if a value exists in a collection")]
-    void WorksInHashSets()
+    private void WorksInHashSets()
     {
         var set = new HashSet<Block<int>>
         {
@@ -114,11 +116,12 @@ public class EqualityTests
         Assert.True(set.Add(Block.Create(1, 2, 3)));
     }
 
-    enum MyEnum { A, B }
-    enum MyEnum2 { A, B }
+    private enum MyEnum { A, B }
+
+    private enum MyEnum2 { A, B }
 
     [Fact]
-    void ThingsThatShouldBeEqual()
+    private void ThingsThatShouldBeEqual()
     {
         // Enums
         Assert.Equal(
@@ -148,11 +151,11 @@ public class EqualityTests
     }
 
     [Fact]
-    void ThingsThatShouldNotBeEqual()
+    private void ThingsThatShouldNotBeEqual()
     {
         // Enums of different types should not be equal even with same integral values
         Assert.NotEqual(
-            Block.Create(MyEnum.A).Cast<object>(), 
+            Block.Create(MyEnum.A).Cast<object>(),
             Block.Create(MyEnum2.A).Cast<object>());
 
         // Different number types are not equal even if they represent the same values
@@ -164,10 +167,13 @@ public class EqualityTests
         Assert.NotEqual(
             Block.Create(new[] { new[] { 1, 2 } }),
             Block.Create(new[] { new[] { 1, 2 } }));
+
         Assert.NotEqual(
             Block.Create(new object(), new object()),
             Block.Create(new object(), new object()));
     }
+
+
 
     //[Fact]
     //void CompareTests()

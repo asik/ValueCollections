@@ -15,6 +15,7 @@ namespace ValueCollections;
 public partial class Block<T> :
     IReadOnlyList<T>,
     IEquatable<Block<T>>,
+    IList<T>,
     IImmutableList<T>
 {
     // Should we be based on ImmutableArray or ImmutableList? After all, we're going to support IImmutableList,
@@ -53,42 +54,53 @@ public partial class Block<T> :
     /// Creates a new <see cref="Block{T}"/> from a sequence of items.
     /// </summary>
     /// <param name="items">The elements to store in the array.</param>
-    public Block(IEnumerable<T> items) =>
+    public Block(IEnumerable<T> items)
+    {
         // ImmutableArray is smart enough to check if it's a finite collection and pre-allocate if possible,
         // so we don't need further overloads for collections.
         _arr = ImmutableArray.CreateRange(items);
+    }
 
     /// <summary>
     /// Creates a new <see cref="Block{T}"/> from an array of items.
     /// </summary>
     /// <param name="items">The elements to store in the array.</param>
-    public Block(params T[] items) =>
+    public Block(params T[] items)
+    {
         // This is to support nice syntax like new Block<int>(1, 2, 3, 4, 5, 6)
         _arr = ImmutableArray.Create(items);
+    }
 
-    Block(ImmutableArray<T> items) =>
-        // For fast creation; used internally
+    /// <summary>
+    /// Creates a new <see cref="Block{T}"/> from an <see cref="ImmutableArray{T}"/>.
+    /// Does not allocate a new array. 
+    /// Use this in combination with <see cref="ImmutableArray{T}.Builder.MoveToImmutable"/>
+    /// to build an array dynamically without an extra copy at the end to generate the <see cref="Block{T}"/>.
+    /// </summary>
+    /// <param name="items">The elements to store in the array.</param>
+    public Block(ImmutableArray<T> items)
+    {
         _arr = items;
+    }
 
     // Further optimizations: add single, two, three-element constructors for perf.
     // Add support for IImmutableList
     // Add overloads for LINQ
     // Performance work:
-    // - is equality via IStructuralEquatable ok? Can we do better when T: IEquatable<T>?
+    // - is equality via IStructuralEquatable ok? Can we do better when T: IEquatable<T>? - ANSWER: yes
     // - can we improve serialization/deserialization perf with a constructor for BlockJsonConverter that takes in JsonSerializerOptions?
     //   https://makolyte.com/dotnet-jsonserializer-is-over-200x-faster-if-you-reuse-jsonserializeroptions/
     // Questionable interfaces:
-    // - ICollection - this is a terrible interface. We don't need it to support System.Text.Json. Any real need to support it?
-    // - IList - for mutable indexable collections e.g. System.Collections.Generic.List. Makes 0 sense for us.
+    // - ICollection, IList - these are terrible, but *sigh* some LINQ optimisations rely on these to provide a .Count property.
     // - IStructuralEquality - do we need this if we're already structurally comparable via IEquatable?
     // - IStructuralComparable - does it really make sense to order arrays? What's the use case? OrderedSet? F# does it though.
 
     #region ImmutableArray interface
 
     /// <inheritdoc cref="ImmutableArray{T}.Empty"/>
-    public static readonly Block<T> Empty = 
+    public static readonly Block<T> Empty =
         new(ImmutableArray<T>.Empty);
-    
+
     /// <inheritdoc cref="ImmutableArray{T}.Length"/>
     public int Length =>
         _arr.Length;
@@ -105,7 +117,7 @@ public partial class Block<T> :
     /// <inheritdoc />
     public bool Equals(Block<T> other)
     {
-        // Equality via IStructuralEquatable appears to box every single element. What a shame.
+        // Equality via IStructuralEquatable appears to box every single element.
         // We can do 57X faster and avoid all allocations like this.
         // Note that _arr.SequenceEquals(other._arr) is a very similar implementation to this but seemed about 30% slower.
         if (other is null)
@@ -139,8 +151,30 @@ public partial class Block<T> :
         obj is Block<T> other && Equals(other);
 
     /// <inheritdoc />
-    public override int GetHashCode() =>
-        ((IStructuralEquatable)_arr).GetHashCode(EqualityComparer<T>.Default);
+    public override int GetHashCode()
+    {
+        // This should be an ok implementation.
+        // HashCode source can be viewed here https://github.com/dotnet/corert/blob/master/src/System.Private.CoreLib/shared/System/HashCode.cs
+        // (not sure where the current implementation is, seems hard to find)
+        // It's recommended by IDE0070.
+        // It does not allocate. It's based on a really fast algorithm.
+        // Its hashes are not cryptographic in quality but that's not the purpose of GetHashCode.
+        // Its hashes are randomized across two runs of the same program and should not be stored outside of the program.
+        // This is to defend against a known attack. See https://andrewlock.net/why-is-string-gethashcode-different-each-time-i-run-my-program-in-net-core/
+        // Also see https://docs.microsoft.com/en-us/archive/blogs/ericlippert/guidelines-and-rules-for-gethashcode
+
+        // Other ideas:
+        // - IStructuralEquatable.GetHashCode() only looks at the last 8 elements, so it's basically useless.
+        // - Cryptographic hashes like MD5, SHA256: presumably not worth much slower performance.
+        // - Copy-pasting some bitwise-operations-based algorithm I don't understand from Stackoverflow or a blog: just no.
+
+        var hashCode = new HashCode();
+        for (var i = 0; i < _arr.Length; ++i)
+        {
+            hashCode.Add(_arr[i]);
+        }
+        return hashCode.ToHashCode();
+    }
 
     /// <inheritdoc />
     public static bool operator ==(Block<T> left, Block<T> right) =>
@@ -193,18 +227,6 @@ public partial class Block<T> :
     /// <param name="length">The number of elements from the source array to include in the resulting array.</param>
     public Block<T> Slice(int start, int length) =>
         new(ImmutableArray.Create(_arr, start, length));
-
-    // The naive approach to comparison doesn't work, running into
-    // System.ArgumentException : Object is not a array with the same number of elements as the array to compare it to.
-    //public int CompareTo(Block<T> other) =>
-    //    ((IStructuralComparable)_arr.ToArray()).CompareTo(other._arr.ToArray(), Comparer<T>.Default);
-
-    //public static bool operator <(Block<T> left, Block<T> right) =>
-    //    left.CompareTo(right) < 0;
-
-    //public static bool operator >(Block<T> left, Block<T> right) =>
-    //    left.CompareTo(right) > 0;
-
 }
 
 /// <summary>
@@ -237,5 +259,16 @@ public static class Block
     /// <param name="items">The elements to store in the array.</param>
     /// <returns>A <see cref="Block{T}"/> containing the items provided.</returns>
     public static Block<T> ToBlock<T>(this IEnumerable<T> items) =>
+        new(items);
+
+    /// <summary>
+    /// Creates a new <see cref="Block{T}"/> from an <see cref="ImmutableArray{T}"/>.
+    /// Does not allocate a new array. 
+    /// Use this in combination with <see cref="ImmutableArray{T}.Builder.MoveToImmutable"/>
+    /// to build an array dynamically without an extra copy at the end to generate the <see cref="Block{T}"/>.
+    /// </summary>
+    /// <param name="items">The elements to store in the array.</param>
+    /// <returns>A <see cref="Block{T}"/> containing the items provided.</returns>
+    public static Block<T> ToBlock<T>(this ImmutableArray<T> items) =>
         new(items);
 }
