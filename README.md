@@ -85,7 +85,7 @@ Any mutation will involve a full copy; that is O(n). For building up a collectio
 ## Questions that may become frequently asked
 ### Can I customize equality with an `EqualityComparer` or a `StringComparison`?
 Not in general. This type is designed to work with the item's intrinsic equality.
-Custom equality should be provided by the type `T` of items you put it, by implementing `IEquable<T>` or otherwise overriding equality.
+Custom equality should be provided by the type `T` of items you put it, by implementing `IEquatable<T>` or otherwise overriding equality.
 That said, there are some methods in the `IImmutableList` explicit implementation that take one, they exist for compatibility.
 Reference types that don't override equality or provide it via IEquatable<T>
 will be compared by reference.
