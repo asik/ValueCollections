@@ -123,18 +123,22 @@ public partial class Block<T> :
         static string PrintElem(object elem)
         {
             var ownToString = elem.ToString();
-            if (ownToString != elem.GetType().ToString())
+            var elemType = elem.GetType();
+            // If the type overrides ToString(), use that
+            if (ownToString != elemType.ToString())
             {
                 return ownToString;
             }
+            // Otherwise if it's a collection, print it element-wise
             if (elem is ICollection coll)
             {
-                return $"{GetNakedTypeName(elem.GetType())}({coll.Count}) {PrintElems(coll)}";
+                return $"{GetNakedTypeName(elemType)}({coll.Count}) {PrintElems(coll)}";
             }
             if (elem is IEnumerable enumerable)
             {
-                return $"{GetNakedTypeName(elem.GetType())} {PrintElems(enumerable)}";
+                return $"{GetNakedTypeName(elemType)} {PrintElems(enumerable)}";
             }
+
             return ownToString;
         }
 
