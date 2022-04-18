@@ -26,7 +26,7 @@ public class IReadOnlyListTests
     void ForEach()
     {
         var elems = new List<string>();
-        foreach(var s in _block)
+        foreach (var s in _block)
         {
             elems.Add(s);
         }

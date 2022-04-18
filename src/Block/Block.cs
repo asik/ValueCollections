@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Text;
 using System.Text.Json.Serialization;
 using ValueCollections.Json;
 
@@ -97,6 +98,56 @@ public partial class Block<T> :
     public int Length =>
         _arr.Length;
 
+    /// <inheritdoc />
+    public override string ToString()
+    {
+        static string GetNakedTypeName(Type type) =>
+            type.IsArray ? "Array" : type.Name.Split('`')[0];
+
+        static string PrintElems(IEnumerable elems)
+        {
+            var cutoff = 10;
+            var elemsArray = elems.Cast<object>().Take(cutoff + 1).ToArray();
+            if (elemsArray.Length == 0)
+            {
+                return "{ }";
+            }
+            var elementString = string.Join(", ", elemsArray.Take(cutoff).Select(PrintElem));
+            if (elemsArray.Length > cutoff)
+            {
+                elementString += ", ...";
+            }
+            return $"{{ {elementString} }}";
+        }
+
+        static string PrintElem(object elem)
+        {
+            var ownToString = elem.ToString();
+            if (ownToString != elem.GetType().ToString())
+            {
+                return ownToString;
+            }
+            if (elem is ICollection coll)
+            {
+                return $"{GetNakedTypeName(elem.GetType())}({coll.Count}) {PrintElems(coll)}";
+            }
+            if (elem is IEnumerable enumerable)
+            {
+                return $"{GetNakedTypeName(elem.GetType())} {PrintElems(enumerable)}";
+            }
+            return ownToString;
+        }
+
+        var elementString = string.Join(", ", _arr.Take(10).Cast<object>().Select(PrintElem));
+        if (Length > 10)
+        {
+            elementString += ", ...";
+        }
+        elementString = Length == 0 ? "{ }" : $"{{ {elementString} }}";
+
+        return $"Block({Length}) {elementString}";
+    }
+
     // We do not support .IsDefault or IsDefaultOrEmpty because this is a reference type and does not support
     // default initialization. Furthermore, IsEmpty seems pretty useless when other common array types do not have it.
 
@@ -173,39 +224,6 @@ public partial class Block<T> :
     /// <inheritdoc />
     public static bool operator !=(Block<T> left, Block<T> right) =>
         !left.Equals(right);
-
-    #endregion
-
-    #region IReadOnlyList<T>
-
-    /// <inheritdoc />
-    public T this[int index] =>
-        _arr[index];
-
-    /// <inheritdoc />
-    public int Count =>
-        _arr.Length;
-
-    /// <summary>
-    /// Returns an enumerator for the contents of the array.
-    /// </summary>
-    /// <returns>An enumerator.</returns>
-    public ImmutableArray<T>.Enumerator GetEnumerator() =>
-        _arr.GetEnumerator();
-
-    /// <summary>
-    /// Returns an enumerator for the contents of the array.
-    /// </summary>
-    /// <returns>An enumerator.</returns>
-    IEnumerator IEnumerable.GetEnumerator() =>
-        _arr.AsEnumerable().GetEnumerator();
-
-    /// <summary>
-    /// Returns an enumerator for the contents of the array.
-    /// </summary>
-    /// <returns>An enumerator.</returns>
-    IEnumerator<T> IEnumerable<T>.GetEnumerator() =>
-        _arr.AsEnumerable().GetEnumerator();
 
     #endregion
 }

@@ -128,45 +128,5 @@ public partial class Block<T>
 
     // Explicit implementations
 
-    IImmutableList<T> IImmutableList<T>.Clear() =>
-        Empty;
 
-    IImmutableList<T> IImmutableList<T>.Add(T value) =>
-        Append(value);
-
-    IImmutableList<T> IImmutableList<T>.AddRange(IEnumerable<T> items) =>
-        Append(items);
-
-    IImmutableList<T> IImmutableList<T>.Insert(int index, T element) =>
-        Insert(index, element);
-
-    IImmutableList<T> IImmutableList<T>.InsertRange(int index, IEnumerable<T> items) =>
-        Insert(index, items);
-
-    IImmutableList<T> IImmutableList<T>.Remove(T value, IEqualityComparer<T> equalityComparer) =>
-        new Block<T>(_arr.Remove(value, equalityComparer));
-
-    IImmutableList<T> IImmutableList<T>.RemoveAll(Predicate<T> match) =>
-        new Block<T>(_arr.RemoveAll(match));
-
-    IImmutableList<T> IImmutableList<T>.RemoveRange(IEnumerable<T> items, IEqualityComparer<T> equalityComparer) =>
-        new Block<T>(_arr.RemoveRange(items, equalityComparer));
-
-    IImmutableList<T> IImmutableList<T>.RemoveRange(int index, int count) =>
-        new Block<T>(_arr.RemoveRange(index, count));
-
-    IImmutableList<T> IImmutableList<T>.RemoveAt(int index) =>
-        RemoveAt(index);
-
-    IImmutableList<T> IImmutableList<T>.SetItem(int index, T value) =>
-        SetItem(index, value);
-
-    IImmutableList<T> IImmutableList<T>.Replace(T oldValue, T newValue, IEqualityComparer<T> equalityComparer) =>
-        new Block<T>(_arr.Replace(oldValue, newValue, equalityComparer));
-
-    int IImmutableList<T>.IndexOf(T item, int index, int count, IEqualityComparer<T> equalityComparer) =>
-        _arr.IndexOf(item, index, count, equalityComparer);
-
-    int IImmutableList<T>.LastIndexOf(T item, int index, int count, IEqualityComparer<T> equalityComparer) =>
-        _arr.LastIndexOf(item, index, count, equalityComparer);
 }

@@ -66,7 +66,7 @@ public class LinqTests
             Block.Create(1, 2, 3, 4).Reverse());
 
     [Fact]
-    [SuppressMessage("Performance", "CA1829:Use Length/Count property instead of Count() when available", Justification = "<Pending>")]
+    [SuppressMessage("Performance", "CA1829:Use Length/Count property instead of Count() when available")]
     void Count() =>
         Assert.Equal(3, Block.Create(1, 2, 3).Count());
 

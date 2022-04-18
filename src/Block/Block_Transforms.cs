@@ -25,7 +25,7 @@ public partial class Block<T>
     /// <summary>
     /// Provides support for range indexing in C# 8.0 and later.
     /// Can also be called directly.
-    /// </summary>        
+    /// </summary>
     /// <param name="start">The index of the first element in the source array to include in the resulting array.</param>
     /// <param name="length">The number of elements from the source array to include in the resulting array.</param>
     public Block<T> Slice(int start, int length) =>
