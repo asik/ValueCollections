@@ -3,16 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using ValueCollections.Json;
 
 namespace ValueCollections;
 
 /// <summary>
 /// An immutable array with value equality. <see href="https://github.com/asik/ValueCollections#readme"/>
 /// </summary>
-[JsonConverter(typeof(BlockJsonConverterFactory))]
 public partial class Block<T> :
     IReadOnlyList<T>,
     IEquatable<Block<T>>,
@@ -76,7 +72,9 @@ public partial class Block<T> :
     /// </summary>
     /// <param name="items">The elements to store in the array.</param>
     public Block(ImmutableArray<T> items) =>
-        _arr = items;
+        _arr = items.IsDefaultOrEmpty
+            ? ImmutableArray<T>.Empty
+            : items;
 
     // Further optimizations: add single, two, three-element constructors for perf.
     // Add support for IImmutableList
@@ -243,26 +241,17 @@ public static class Block
     /// <typeparam name="T">The type of element stored in the array.</typeparam>
     /// <param name="items">The elements to store in the array.</param>
     /// <returns>A <see cref="Block{T}"/> containing the items provided.</returns>
-    public static Block<T> CreateRange<T>(IEnumerable<T> items) =>
-        new(items);
-
-    /// <summary>
-    /// Creates a new <see cref="Block{T}"/> from an array of items.
-    /// </summary>
-    /// <typeparam name="T">The type of element stored in the array.</typeparam>
-    /// <param name="items">The elements to store in the array.</param>
-    /// <returns>A <see cref="Block{T}"/> containing the items provided.</returns>
-    public static Block<T> Create<T>(params T[] items) =>
-        new(items);
-
-    /// <summary>
-    /// Creates a new <see cref="Block{T}"/> from a sequence of items.
-    /// </summary>
-    /// <typeparam name="T">The type of element stored in the array.</typeparam>
-    /// <param name="items">The elements to store in the array.</param>
-    /// <returns>A <see cref="Block{T}"/> containing the items provided.</returns>
     public static Block<T> ToBlock<T>(this IEnumerable<T> items) =>
         new(items);
+
+    /// <summary>
+    /// Creates a new <see cref="Block{T}"/> from a collection of items.
+    /// </summary>
+    /// <inheritdoc cref="ToBlock{T}(IEnumerable{T})"/>    
+    public static Block<T> ToBlock<T>(this IReadOnlyCollection<T> items) =>
+        items.Count == 0
+            ? Block<T>.Empty
+            : new(items);
 
     /// <summary>
     /// Creates a new <see cref="Block{T}"/> from an <see cref="ImmutableArray{T}"/>.
@@ -270,8 +259,28 @@ public static class Block
     /// Use this in combination with <see cref="ImmutableArray{T}.Builder.MoveToImmutable"/>
     /// to build an array dynamically without an extra copy at the end to generate the <see cref="Block{T}"/>.
     /// </summary>
-    /// <param name="items">The elements to store in the array.</param>
-    /// <returns>A <see cref="Block{T}"/> containing the items provided.</returns>
+    /// <inheritdoc cref="ToBlock{T}(IEnumerable{T})"/>  
     public static Block<T> ToBlock<T>(this ImmutableArray<T> items) =>
-        new(items);
+        items.IsDefaultOrEmpty
+            ? Block<T>.Empty
+            : new(items);
+
+    /// <summary>
+    /// Creates a new <see cref="Block{T}"/> from an array or an argument list of items.
+    /// </summary>
+    /// <inheritdoc cref="ToBlock{T}(IEnumerable{T})"/> 
+    public static Block<T> Create<T>(params T[] items) =>
+        items.ToBlock();
+
+    /// <inheritdoc cref="ToBlock{T}(IEnumerable{T})"/> 
+    public static Block<T> CreateRange<T>(IEnumerable<T> items) =>
+        items.ToBlock();
+
+    /// <inheritdoc cref="ToBlock{T}(IReadOnlyCollection{T})"/> 
+    public static Block<T> CreateRange<T>(IReadOnlyCollection<T> items) =>
+        items.ToBlock();
+
+    /// <inheritdoc cref="ToBlock{T}(ImmutableArray{T})"/>
+    public static Block<T> CreateRange<T>(ImmutableArray<T> items) =>
+        items.ToBlock();
 }

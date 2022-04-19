@@ -16,6 +16,7 @@ namespace ValueCollections;
 // to get the Count property. ToArray, ToList and Reverse also benefit from ICollection.CopyTo.
 // We don't want people stumbling unto methods that throw NotSupportedExceptions though,
 // so the best we can do is implement these interfaces explicitely.
+// This is also really important so we get compilation errors on new Block<int> { 1, 2, 3 }.
 
 // IImmutableList<T> is not a great interface for us, with overloads taking IEqualityComparer<T>.
 // All the members also return IImmutableList<T>s rather than Block<T>, and cannot be implemented
@@ -126,16 +127,16 @@ public partial class Block<T>
         Insert(index, items);
 
     IImmutableList<T> IImmutableList<T>.Remove(T value, IEqualityComparer<T> equalityComparer) =>
-        new Block<T>(_arr.Remove(value, equalityComparer));
+        _arr.Remove(value, equalityComparer).ToBlock();
 
     IImmutableList<T> IImmutableList<T>.RemoveAll(Predicate<T> match) =>
-        new Block<T>(_arr.RemoveAll(match));
+        _arr.RemoveAll(match).ToBlock();
 
     IImmutableList<T> IImmutableList<T>.RemoveRange(IEnumerable<T> items, IEqualityComparer<T> equalityComparer) =>
-        new Block<T>(_arr.RemoveRange(items, equalityComparer));
+        _arr.RemoveRange(items, equalityComparer).ToBlock();
 
     IImmutableList<T> IImmutableList<T>.RemoveRange(int index, int count) =>
-        new Block<T>(_arr.RemoveRange(index, count));
+        _arr.RemoveRange(index, count).ToBlock();
 
     IImmutableList<T> IImmutableList<T>.RemoveAt(int index) =>
         RemoveAt(index);
@@ -144,7 +145,7 @@ public partial class Block<T>
         SetItem(index, value);
 
     IImmutableList<T> IImmutableList<T>.Replace(T oldValue, T newValue, IEqualityComparer<T> equalityComparer) =>
-        new Block<T>(_arr.Replace(oldValue, newValue, equalityComparer));
+        _arr.Replace(oldValue, newValue, equalityComparer).ToBlock();
 
     int IImmutableList<T>.IndexOf(T item, int index, int count, IEqualityComparer<T> equalityComparer) =>
         _arr.IndexOf(item, index, count, equalityComparer);

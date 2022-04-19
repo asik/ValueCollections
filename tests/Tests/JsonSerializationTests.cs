@@ -43,7 +43,7 @@ public class JsonSerializationTests
         var deserialized =
             JsonSerializer.Deserialize<Block<int>>(serialized);
 
-        Assert.Equal(Block<int>.Empty, deserialized);
+        Assert.Same(Block<int>.Empty, deserialized);
     }
 
     [Fact]

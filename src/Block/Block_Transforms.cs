@@ -12,6 +12,9 @@ public partial class Block<T>
     // Try to rely on LINQ where it makes sense, but benchmark for important things that could benefit from optimization.
     // e.g. sorting, filtering
 
+    // Do NOT have a method called Add(T), because that enables `new Block<T> { 1, 2, 3 }` which would not work.
+    // Definitely was a mistake to put this on IImmutableList.
+
     // Don't use -Range suffix but rely on overloading instead. This simplifies the interface.
     // There's no issue with generic resolution as the generic type is not inferred from the argument (as it is in Block.Create).
 
@@ -37,11 +40,11 @@ public partial class Block<T>
 
     /// <inheritdoc cref="ImmutableArray{T}.AddRange(IEnumerable{T})"/>
     public Block<T> Append(IEnumerable<T> items) =>
-        new(_arr.AddRange(items));
+        _arr.AddRange(items).ToBlock();
 
     /// <inheritdoc cref="ImmutableArray{T}.AddRange(ImmutableArray{T})"/>
     public Block<T> Append(Block<T> items) =>
-        new(_arr.AddRange(items._arr));
+        _arr.AddRange(items._arr).ToBlock();
 
     /// <inheritdoc cref="ImmutableArray{T}.Insert(int, T)"/>
     public Block<T> Insert(int index, T item) =>
@@ -49,15 +52,15 @@ public partial class Block<T>
 
     /// <inheritdoc cref="ImmutableArray{T}.InsertRange(int, IEnumerable{T})"/>
     public Block<T> Insert(int index, IEnumerable<T> items) =>
-        new(_arr.InsertRange(index, items));
+        _arr.InsertRange(index, items).ToBlock();
 
     /// <inheritdoc cref="ImmutableArray{T}.InsertRange(int, ImmutableArray{T})"/>
     public Block<T> Insert(int index, Block<T> items) =>
-        new(_arr.InsertRange(index, items._arr));
+        _arr.InsertRange(index, items._arr).ToBlock();
 
     /// <inheritdoc cref="ImmutableArray{T}.RemoveAt(int)"/>
     public Block<T> RemoveAt(int index) =>
-        new(_arr.RemoveAt(index));
+        _arr.RemoveAt(index).ToBlock();
 
     ///// <inheritdoc cref="ImmutableArray{T}.RemoveRange(IEnumerable{T})"/>
     //public Block<T> RemoveFirst(IEnumerable<T> items) =>

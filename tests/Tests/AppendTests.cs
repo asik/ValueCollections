@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Immutable;
 using System.Linq;
 using ValueCollections;
 using Xunit;
@@ -31,6 +32,16 @@ public class AppendTests
         Assert.Equal(
             Block.Create('a', 'b', 'c', 'd'),
             Block.Create('a', 'b').Append("cd"));
+
+        // Append - result is empty - Block overload
+        Assert.Same(
+            Block<int>.Empty,
+            Block<int>.Empty.Append(Block<int>.Empty));
+
+        // Append - result is empty - IEnumerable overload
+        Assert.Same(
+            Block<int>.Empty,
+            Block<int>.Empty.Append(Array.Empty<int>()));
     }
 
     [Fact]
@@ -55,6 +66,16 @@ public class AppendTests
         Assert.Equal(
             Block.Create(1, 2, 3, 4),
             Block<int>.Empty.Insert(0, new[] { 1, 2, 3, 4 }));
+
+        // Result is empty - IEnumerable overload
+        Assert.Same(
+            Block<int>.Empty,
+            Block<int>.Empty.Insert(0, Array.Empty<int>()));
+
+        // Result is empty - Block overload
+        Assert.Same(
+            Block<int>.Empty,
+            Block<int>.Empty.Insert(0, Block<int>.Empty));
 
         // Exception
         Assert.Throws<ArgumentOutOfRangeException>(() =>
@@ -82,6 +103,10 @@ public class AppendTests
 
         Assert.Throws<ArgumentOutOfRangeException>(() =>
             Block.Create("a").RemoveAt(1));
+
+        Assert.Same(
+            Block<int>.Empty,
+            Block.Create(1).RemoveAt(0));
     }
 
 }
