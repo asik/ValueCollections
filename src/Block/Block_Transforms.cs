@@ -13,10 +13,6 @@ public partial class Block<T>
     // e.g. sorting, filtering
 
     // Do NOT have a method called Add(T), because that enables `new Block<T> { 1, 2, 3 }` which would not work.
-    // Definitely was a mistake to put this on IImmutableList.
-
-    // Don't use -Range suffix but rely on overloading instead. This simplifies the interface.
-    // There's no issue with generic resolution as the generic type is not inferred from the argument (as it is in Block.Create).
 
     // I'm not a huge fan of the Remove(T item), Remove(T[] items) methods on ImmutableArray, they only remove the first occurence
     // and that's counter-intuitive to me. Should be called RemoveFirst. And then are they that useful?
@@ -61,14 +57,6 @@ public partial class Block<T>
     /// <inheritdoc cref="ImmutableArray{T}.RemoveAt(int)"/>
     public Block<T> RemoveAt(int index) =>
         _arr.RemoveAt(index).ToBlock();
-
-    ///// <inheritdoc cref="ImmutableArray{T}.RemoveRange(IEnumerable{T})"/>
-    //public Block<T> RemoveFirst(IEnumerable<T> items) =>
-    //    new(_arr.RemoveRange(items));
-
-    ///// <inheritdoc cref="ImmutableArray{T}.Remove(T, IEqualityComparer{T}?)"/>
-    //public Block<T> RemoveFirst(T item) =>
-    //    new(_arr.Remove(item));
 
     /// <inheritdoc cref="ImmutableArray{T}.SetItem(int, T)"/>
     public Block<T> SetItem(int index, T item) =>

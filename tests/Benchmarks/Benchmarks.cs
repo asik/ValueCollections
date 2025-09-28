@@ -15,7 +15,7 @@ public class BlockBenchmarks
     private readonly Block<string> largeStringBlockCopy = Enumerable.Range(0, largeSize).Select(i => i.ToString()).ToBlock();
     private readonly string[] largeStringArray = Enumerable.Range(0, largeSize).Select(i => i.ToString()).ToArray();
     private readonly string[] largeStringArrayCopy = Enumerable.Range(0, largeSize).Select(i => i.ToString()).ToArray();
-    private readonly Block<int> blockCopy = new(1, 2, 3);
+    private readonly Block<int> blockCopy = Block.Create(1, 2, 3);
     private readonly List<int> sourceList = new() { 1, 2, 3 };
     private readonly int[] sourceArray = new[] { 1, 2, 3 };
 
