@@ -21,12 +21,6 @@ public class CreationTests
             new Block<int>(new List<int> { 1, 2, 3 }));
 
     [Fact]
-    void ConstructorFromParamsArray() =>
-        Assert.Equal(
-            Block.Create(1, 2, 3, 4, 5, 6),
-            new Block<int>(1, 2, 3, 4, 5, 6));
-
-    [Fact]
     void CreateRangeFromEnumerable() =>
         Assert.Equal(
             Block.Create(1, 2, 3),
@@ -54,5 +48,50 @@ public class CreationTests
         Assert.Equal(array[1..^1], block[1..^1]);
         Assert.Equal(array[..^0], block[..^0]);
         Assert.Throws<IndexOutOfRangeException>(() => array[^0]);
+    }
+
+    [Fact]
+    void EmptyLiteralCollectionIsEmpty() => 
+        Assert.Equal(Block<int>.Empty, []);
+
+    [Fact]
+    void EmptyLiteralCollectionIsOptimized()
+    {
+        // This does not test that the compiler replaces [] with Block<int>.Empty
+        // (it doesn't, it calls Block.Create with an empty span).
+        // But internally, we do a length check and return Block<int>.Empty.
+        // As a result, [] is in fact less efficient than writing Block<int>.Empty.
+        Block<int> empty = [];
+        Assert.Same(Block<int>.Empty, empty);
+    }
+
+    [Fact]
+    void CollectionExpressionYieldsContainedItems() => 
+        Assert.Equal(Block.Create(2, 1, 3), [2, 1, 3]);
+
+    [Fact]
+    void CollectionExpressionSpreadElementYieldsCorrectItems()
+    {
+        var arr = new int[] { 4, 3, 2 };
+        Block<int> actual = [.. arr];
+        Assert.Equal(Block.Create(4, 3, 2), actual);
+    }
+
+    [Fact]
+    void CollectionExpressionSpreadElementComplexYieldsCorrectItems()
+    {
+        Block<int> actual = [
+            .. new int[] { 4, 3, 2 }, 
+            1, 
+            .. new int[] { 0, -1 }];
+        Assert.Equal(Block.Create(4, 3, 2, 1, 0, -1), actual);
+    }
+
+    [Fact]
+    void CollectionExpressionSpreadElementIntoOtherCollection()
+    {
+        var source = new int[] { 5, 4, 3 };
+        Block<int> arr = [.. source];
+        Assert.Equal(source, arr);
     }
 }

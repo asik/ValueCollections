@@ -10,14 +10,9 @@ namespace Tests;
 
 public class ImmutableArrayInterfaceTests
 {
-    readonly Block<int> defaultInstance = new();
     readonly Block<int> emptyInstance = Block<int>.Empty;
     readonly Block<string> nonEmptyBlock = Block.Create("a", "b", "c");
     readonly Block<string> emptyBlock = Block<string>.Empty;
-
-    [Fact]
-    void LengthDefault() =>
-        Assert.Equal(0, defaultInstance.Length);
 
     [Fact]
     void LengthEmpty() =>

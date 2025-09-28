@@ -27,7 +27,7 @@ public class JsonSerializationTests
         var original = new ComplexType(
             A: "abc",
             B: 3,
-            Inner: new Block<InnerType>(new InnerType("w"), new InnerType("h")));
+            Inner: Block.Create(new InnerType("w"), new InnerType("h")));
 
         var serialized = JsonSerializer.Serialize(original);
         var deserialized =

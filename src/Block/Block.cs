@@ -3,48 +3,32 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace ValueCollections;
+
+// 2025 update
+// - F# no longer plans on adding a "Block" type. https://github.com/fsharp/fslang-design/discussions/528#discussioncomment-5595874
+//      - Drop the weird name and call this "ValueArray" probably.
+// - C# added collection expressions
+//      - Add a unit test for it
+//      - Make it work if it doesn't
+//      - Evaluate potential uses of the syntax for optimization inside the implementation
+// - Why do we need to use ImmutableArray internally instead of just a regular array, again?
+// - Have a file for each interface instead of regions
+// - 
 
 /// <summary>
 /// An immutable array with value equality. <see href="https://github.com/asik/ValueCollections#readme"/>
 /// </summary>
+[CollectionBuilder(typeof(Block), "Create")]
 public partial class Block<T> :
     IReadOnlyList<T>,
     IEquatable<Block<T>>,
     IList<T>,
     IImmutableList<T>
 {
-    // Should we be based on ImmutableArray or ImmutableList? After all, we're going to support IImmutableList,
-    // and ImmutableList is a better type for that purpose, optimized for adding/removing.
-    // Why select a type that's going to be slow on updates if we want to support updates?
-    // Rationale: if update performance is important, are you going to be happy with ImmutableList?
-    // Or are you going to choose List<T> or T[] or something imperative.
-    // I think the vast majority of use cases for this type will be simple updates where a single array allocation is fine.
-    // For lots of updates where perf matters, you can use something mutable.
-    // Advantages of ImmutableArray that we would lose by going to ImmutableList:
-    // - Consistency with planned F# Block type
-    // - Array-like performance in creation, iteration
-    // - 0 GC overhead over the underlying array (less overhead than List<T>!)
-
-    // So it should be based on ImmutableArray.
-
-    // Should it be a reference type or a value type?
-    // ImmutableArray is a value type. It does this because it is designed as a low-overhead alternative to
-    // ImmutableList. It's also unsafe, throwing InvalidOperationException/NullReferenceException
-    // when uninitialized. We could make every function go through an if statement to make it safe, but that would
-    // slow down usage.
-    // ImmutableArray exposes IsDefault, IsDefaultOrEmpty and IsEmpty. It needs all 3
-    // C# now has nullability checking for reference types, making them much safer than they used to be when
-    // ImmutableArray was designed. Since they allow us to control our initialization, we can be fast on usage.
-    // With nullability checking, reference type also offer a correctness advantage that structs lack: the compiler 
-    // warns if they're left uninitialized.
-    // However, making it a reference means two allocations per instance instead of one. This means using Block<T>
-    // creates more GC pressure, leading to more frequent GC. However, this is true of every collection type outside of
-    // plain arrays.
-
-    // Overall, making it a reference type is the better solution.
-
     readonly ImmutableArray<T> _arr;
 
     /// <summary>
@@ -57,12 +41,19 @@ public partial class Block<T> :
         _arr = ImmutableArray.CreateRange(items);
 
     /// <summary>
-    /// Creates a new <see cref="Block{T}"/> from an array of items.
+    /// Creates a new <see cref="Block{T}"/> from a <see cref="ReadOnlySpan{T}"/>.
     /// </summary>
     /// <param name="items">The elements to store in the array.</param>
-    public Block(params T[] items) =>
-        // This is to support nice syntax like new Block<int>(1, 2, 3, 4, 5, 6)
-        _arr = ImmutableArray.Create(items);
+    public Block(ReadOnlySpan<T> items) =>
+        _arr = [.. items];
+
+
+    /// <summary>
+    /// Uses the provided array as the backing collection, as-is. This is only for Roslyn code generation optimization
+    /// and not meant to be used by external code.
+    /// </summary>
+    internal Block(T[] items) =>
+        _arr = ImmutableCollectionsMarshal.AsImmutableArray(items);
 
     /// <summary>
     /// Creates a new <see cref="Block{T}"/> from an <see cref="ImmutableArray{T}"/>.
@@ -163,6 +154,11 @@ public partial class Block<T> :
         // Equality via IStructuralEquatable appears to box every single element.
         // We can do 57X faster and avoid all allocations like this.
         // Note that _arr.SequenceEquals(other._arr) is a very similar implementation to this but seemed about 30% slower.
+        if (ReferenceEquals(this, other))
+        {
+            return true;
+        }
+
         if (other is null)
         {
             return false;
@@ -271,6 +267,15 @@ public static class Block
     /// <inheritdoc cref="ToBlock{T}(IEnumerable{T})"/> 
     public static Block<T> Create<T>(params T[] items) =>
         items.ToBlock();
+
+    /// <summary>
+    /// Creates a new <see cref="Block{T}"/> from a <see cref="ReadOnlySpan{T}"/> of items.
+    /// </summary>
+    /// <inheritdoc cref="ToBlock{T}(IEnumerable{T})"/> 
+    public static Block<T> Create<T>(ReadOnlySpan<T> items) =>
+        items.Length == 0 
+            ? Block<T>.Empty 
+            : new Block<T>(items);
 
     /// <inheritdoc cref="ToBlock{T}(IEnumerable{T})"/> 
     public static Block<T> CreateRange<T>(IEnumerable<T> items) =>

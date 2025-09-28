@@ -27,9 +27,6 @@ public class EqualityTests
     }
 
     [Fact]
-    void IEquatableUninitialized() => Assert.True(new Block<int>().Equals(new Block<int>()));
-
-    [Fact]
     void ObjectEquals()
     {
         var block = Block.Create(1, 2, 3);
