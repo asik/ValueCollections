@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 
 namespace ValueCollections;
 
@@ -46,14 +45,6 @@ public partial class Block<T> :
     /// <param name="items">The elements to store in the array.</param>
     public Block(ReadOnlySpan<T> items) =>
         _arr = [.. items];
-
-
-    /// <summary>
-    /// Uses the provided array as the backing collection, as-is. This is only for Roslyn code generation optimization
-    /// and not meant to be used by external code.
-    /// </summary>
-    internal Block(T[] items) =>
-        _arr = ImmutableCollectionsMarshal.AsImmutableArray(items);
 
     /// <summary>
     /// Creates a new <see cref="Block{T}"/> from an <see cref="ImmutableArray{T}"/>.
