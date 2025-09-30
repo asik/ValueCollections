@@ -161,4 +161,43 @@ public class TransformTests
         Assert.Same(
             Block<int>.Empty,
             Block.Create(1).RemoveAt(0));
+
+    [Fact]
+    void SetItemOnEmptyArrayThrows() =>
+        Assert.Throws<IndexOutOfRangeException>(() => 
+            Block<string>.Empty.SetItem(0, "a"));
+
+    [Fact]
+    void SetItemOnNegativeIndexThrows() =>
+        Assert.Throws<IndexOutOfRangeException>(() =>
+            Block.Create(1, 2, 3).SetItem(-1, 94));
+
+    [Fact]
+    void SetItemBeyondEndIndexThrows() =>
+        Assert.Throws<IndexOutOfRangeException>(() =>
+            Block.Create(1, 2, 3).SetItem(3, 94));
+
+    [Fact]
+    void SetItemReplacesItemInMiddle()
+    {
+        var original = Block.Create(1, 2, 3);
+        var edited = original.SetItem(1, -2);
+        Assert.Equal(Block.Create(1, -2, 3), edited);
+    }
+
+    [Fact]
+    void SetItemReplacesItemAtBeginning()
+    {
+        var original = Block.Create(1, 2, 3);
+        var edited = original.SetItem(0, -2);
+        Assert.Equal(Block.Create(-2, 2, 3), edited);
+    }
+
+    [Fact]
+    void SetItemReplacesItemAtEnd()
+    {
+        var original = Block.Create(1, 2, 3);
+        var edited = original.SetItem(2, -2);
+        Assert.Equal(Block.Create(1, 2, -2), edited);
+    }
 }

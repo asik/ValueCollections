@@ -93,9 +93,13 @@ public partial class Block<T>
     }
 
     /// <inheritdoc cref="ImmutableArray{T}.SetItem(int, T)"/>
-    public Block<T> SetItem(int index, T item) =>
-        throw new NotImplementedException();
-    //new(_arr.SetItem(index, item));
+    public Block<T> SetItem(int index, T item)
+    {
+        ThrowIndexOfOutRangeIfNotInBounds(index);
+        var elementsBefore = _arr.AsSpan(0, index);
+        var elementsAfter = _arr.AsSpan(index + 1, _arr.Length - index - 1);
+        return ValueCollectionsMarshal.AsBlock([.. elementsBefore, item, .. elementsAfter]);
+    }
 
 
     void ThrowIfIndexInvalidForInsert(int index)
