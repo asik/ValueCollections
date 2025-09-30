@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using ValueCollections;
 using Xunit;
@@ -8,63 +10,63 @@ namespace Tests;
 public class TransformTests
 {
     [Fact]
-    void AppendArray() =>
+    void AddArray() =>
         Assert.Equal(
             Block.Create(1, 2, 3, 1, 2, 3),
-            Block.Create(1, 2, 3).Append(new[] { 1, 2, 3 }));
+            Block.Create(1, 2, 3).AddRange(new[] { 1, 2, 3 }));
 
     [Fact]
-    void AppendSingleValue() =>
+    void AddSingleValue() =>
         Assert.Equal(
             Block.Create(1, 2, 3, 2),
-            Block.Create(1, 2, 3).Append(2));
+            Block.Create(1, 2, 3).Add(2));
 
     [Fact]
-    void AppendSingleValueToEmptyBlock() =>
+    void AddSingleValueToEmptyBlock() =>
         Assert.Equal(
             Block.Create(2),
-            Block<int>.Empty.Append(2));
+            Block<int>.Empty.Add(2));
 
 
     [Fact]
-    void AppendCollectionOfCollections() =>
-        // Resolves to the right .Append overload
+    void AddCollectionOfCollections() =>
+        // Resolves to the right .Add overload
         Assert.Equal(
             Block.Create(1, 2, 3, 4),
             Block.Create(new[] { 1 }, new[] { 2 })
-                .Append(new[] { new[] { 3 }, new[] { 4 } })
+                .AddRange(new[] { new[] { 3 }, new[] { 4 } })
                 .SelectMany(arr => arr)
                 .ToBlock());
 
     [Fact]
-    void AppendStringToABlockOfChar() => 
+    void AddStringToABlockOfChar() => 
         Assert.Equal(
             Block.Create('a', 'b', 'c', 'd'),
-            Block.Create('a', 'b').Append("cd"));
+            Block.Create('a', 'b').AddRange("cd"));
 
     [Fact]
-    void AppendABlockToAnotherBlock() =>
+    void AddABlockToAnotherBlock() =>
         Assert.Equal(
             Block.Create(1, 2, 3, 4),
-            Block.Create(1, 2).Append(Block.Create(3, 4)));
+            Block.Create(1, 2).AddRange(Block.Create(3, 4)));
 
     [Fact]
-    void AppendABlockToAnEmptyBlock() =>
+    void AddABlockToAnEmptyBlock() =>
         Assert.Equal(
             Block.Create(3, 4),
-            Block<int>.Empty.Append(Block.Create(3, 4)));
+            Block<int>.Empty.AddRange(Block.Create(3, 4)));
 
     [Fact]
-    void AppendAnEmptyBlockToABlock() =>
+    void AddAnEmptyBlockToABlock() =>
         Assert.Equal(
             Block.Create(1, 2),
-            Block.Create(1, 2).Append(Block<int>.Empty));
+            Block.Create(1, 2).AddRange(Block<int>.Empty));
 
     [Fact]
-    void AppendAnEmptyBlockToABlock_Optimized() =>
+    void AddAnEmptyBlockToABlock_Optimized() =>
         Assert.Same(
             Block<int>.Empty,
-            Block<int>.Empty.Append(Block<int>.Empty));
+            Block<int>.Empty.AddRange(Block<int>.Empty));
 
     [Fact]
     void InsertOneItemAtTheBeginning() =>
@@ -87,35 +89,35 @@ public class TransformTests
     void InsertRangeAtTheBeginning() =>
         Assert.Equal(
             Block.Create("a", "b", "c", "d"),
-            Block.Create("c", "d").Insert(0, new[] { "a", "b" }));
+            Block.Create("c", "d").InsertRange(0, new[] { "a", "b" }));
 
     [Fact]
     void InsertRangeInTheMiddle() =>
         Assert.Equal(
             Block.Create("a", "b", "c", "d"),
-            Block.Create("a", "d").Insert(1, new[] { "b", "c" }));
+            Block.Create("a", "d").InsertRange(1, new[] { "b", "c" }));
 
     [Fact]
     void InsertRangeAtTheEnd() =>
         Assert.Equal(
             Block.Create("a", "b", "c", "d"),
-            Block.Create("a", "b").Insert(2, new[] { "c", "d" }));
+            Block.Create("a", "b").InsertRange(2, new[] { "c", "d" }));
 
     void InsertStringInCharArray() =>
         Assert.Equal(
             Block.Create('a', 'b', 'c', 'd'),
-            Block.Create('a', 'd').Insert(1, "bc"));
+            Block.Create('a', 'd').InsertRange(1, "bc"));
 
     void InsertIntoAnEmptyBlock() =>
         Assert.Equal(
             Block.Create(1, 2, 3, 4),
-            Block<int>.Empty.Insert(0, new[] { 1, 2, 3, 4 }));
+            Block<int>.Empty.InsertRange(0, new[] { 1, 2, 3, 4 }));
 
     [Fact]
     void InsertEmptyReturnsSameInstance() =>
         Assert.Same(
             Block<int>.Empty,
-            Block<int>.Empty.Insert(0, Block<int>.Empty));
+            Block<int>.Empty.InsertRange(0, Block<int>.Empty));
 
 
     [Fact]

@@ -30,22 +30,23 @@ public partial class Block<T>
         new(ImmutableArray.Create(_arr, start, length));
 
     /// <inheritdoc cref="ImmutableArray{T}.Add(T)"/>
-    public Block<T> Append(T item) =>
+    public Block<T> Add(T item) =>
         ValueCollectionsMarshal.AsBlock([.. _arr, item]);
 
     // TODO consider adding a ReadOnlySpan overload
 
     /// <inheritdoc cref="ImmutableArray{T}.AddRange(IEnumerable{T})"/>
-    public Block<T> Append(IEnumerable<T> items) =>
+    public Block<T> AddRange(IEnumerable<T> items) =>
         ValueCollectionsMarshal.AsBlock([.. _arr, ..items]);
 
     /// <inheritdoc cref="ImmutableArray{T}.AddRange(ImmutableArray{T})"/>
-    public Block<T> Append(Block<T> items) =>
+    public Block<T> AddRange(Block<T> items) =>
         items.Length == 0 
             ? this 
             : ValueCollectionsMarshal.AsBlock([.. _arr, ..items._arr]);
 
     /// <inheritdoc cref="ImmutableArray{T}.Insert(int, T)"/>
+    /// <exception cref="IndexOutOfRangeException"/>
     public Block<T> Insert(int index, T item)
     {
         ThrowIfIndexInvalidForInsert(index);
@@ -55,7 +56,8 @@ public partial class Block<T>
     }
 
     /// <inheritdoc cref="ImmutableArray{T}.InsertRange(int, IEnumerable{T})"/>
-    public Block<T> Insert(int index, IEnumerable<T> items)
+    /// <exception cref="IndexOutOfRangeException"/>
+    public Block<T> InsertRange(int index, IEnumerable<T> items)
     {
         ThrowIfIndexInvalidForInsert(index);
         var elementsBefore = _arr.AsSpan(0, index);
@@ -64,7 +66,8 @@ public partial class Block<T>
     }
 
     /// <inheritdoc cref="ImmutableArray{T}.InsertRange(int, ImmutableArray{T})"/>
-    public Block<T> Insert(int index, Block<T> items)
+    /// <exception cref="IndexOutOfRangeException"/>
+    public Block<T> InsertRange(int index, Block<T> items)
     {
         if (items.Length == 0)
         {
@@ -79,6 +82,7 @@ public partial class Block<T>
     //_arr.InsertRange(index, items._arr).ToBlock();
 
     /// <inheritdoc cref="ImmutableArray{T}.RemoveAt(int)"/>
+    /// <exception cref="IndexOutOfRangeException"/>
     public Block<T> RemoveAt(int index)
     {
         ThrowIndexOfOutRangeIfNotInBounds(index);
@@ -93,6 +97,7 @@ public partial class Block<T>
     }
 
     /// <inheritdoc cref="ImmutableArray{T}.SetItem(int, T)"/>
+    /// <exception cref="IndexOutOfRangeException"/>
     public Block<T> SetItem(int index, T item)
     {
         ThrowIndexOfOutRangeIfNotInBounds(index);

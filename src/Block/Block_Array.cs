@@ -23,6 +23,11 @@ public partial class Block<T>
         Array.LastIndexOf(_arr, item);
 
 
+    /// <summary> 
+    /// Searches for an element that matches the conditions defined by the specified
+    /// predicate, and returns the zero-based index of the first occurrence within the
+    /// entire <see cref="Block{T}"/>.
+    /// </summary>
     /// <param name="match">
     /// A function that takes in an item 
     /// and returns whether it is the one we are looking for.
