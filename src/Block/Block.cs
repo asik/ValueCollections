@@ -21,12 +21,12 @@ public partial class Block<T>
     T[] _arr;
 
     /// <summary>
-    /// Exposes the internal array. Exposed through <see cref="Unsafe.ValueCollectionsMarshal"/> only.
+    /// Exposes the internal array. Exposed publicly through <see cref="Unsafe.ValueCollectionsMarshal"/> only.
     /// </summary>
     internal T[] UnsafeInternalArray => _arr;
 
     /// <summary>
-    /// Unsafe wrapping constructor. Exposed through <see cref="Unsafe.ValueCollectionsMarshal"/> only.
+    /// Unsafe wrapping constructor. Exposed publicly through <see cref="Unsafe.ValueCollectionsMarshal"/> only.
     /// </summary>
     internal Block(T[] arr) =>
         _arr = arr;
