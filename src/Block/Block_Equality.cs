@@ -1,48 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ValueCollections;
 
 public partial class Block<T> : IEquatable<Block<T>>
 {
-    static readonly EqualityComparer<T> _comparer = EqualityComparer<T>.Default;
-
     /// <inheritdoc />
-    public bool Equals(Block<T> other)
-    {
-        // Equality via IStructuralEquatable appears to box every single element.
-        // We can do 57X faster and avoid all allocations like this.
-        // Note that _arr.SequenceEquals(other._arr) is a very similar implementation to this but seemed about 30% slower.
-        if (ReferenceEquals(this, other))
-        {
-            return true;
-        }
-
-        if (other is null)
-        {
-            return false;
-        }
-
-        var otherArray = other._arr;
-        if (otherArray.Length != _arr.Length)
-        {
-            return false;
-        }
-
-        // Doing two optimizations here, both result in measurably faster code:
-        // We cache EqualityComparer<T>.Default in our own static field
-        // We copy that static field into a local here because local variable access is faster
-        var comparer = _comparer;
-        for (var i = 0; i < _arr.Length; ++i)
-        {
-            if (!comparer.Equals(_arr[i], otherArray[i]))
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
+    public bool Equals(Block<T> other) =>
+        // This has a bunch of useful optimizations and may keep improving in future .NET versions.
+        // For arrays of blittable types e.g. int, it uses memcmp efficiently. 
+        _arr.SequenceEqual(other._arr);
 
     /// <inheritdoc />
     public override bool Equals(object obj) =>

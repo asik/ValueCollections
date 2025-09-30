@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
+using System.Runtime.InteropServices;
 using ValueCollections;
+using ValueCollections.Unsafe;
 using Xunit;
 
 namespace Tests;
@@ -53,6 +56,28 @@ public class CreationTests
     }
 
     [Fact]
+    void CreateFromDefaultImmutableArray() =>
+        Assert.Same(
+            Block<int>.Empty,
+            Block.CreateRange(default(ImmutableArray<int>)));
+
+    [Fact]
+    void CreateFromEmptyImmutableArray() =>
+        Assert.Same(
+            Block<int>.Empty,
+            Block.CreateRange(ImmutableArray<int>.Empty));
+
+    [Fact]
+    void ReusesImmutableArrayInternalArray()
+    {
+        var immArr = ImmutableArray.Create(1, 2, 3);
+        var block = Block.CreateRange(immArr);
+        Assert.Same(
+            ImmutableCollectionsMarshal.AsArray(immArr),
+            ValueCollectionsMarshal.AsArray(block));
+    }
+
+    [Fact]
     void EmptyLiteralCollectionIsEmpty() => 
         Assert.Equal(Block<int>.Empty, []);
 
@@ -61,7 +86,8 @@ public class CreationTests
     {
         // This does not test that the compiler replaces [] with Block<int>.Empty
         // (it doesn't, it calls Block.Create with an empty span).
-        // But internally, we do a length check and return Block<int>.Empty.
+        // But internally, we do a length check and return Block<int>.Empty, so at least
+        // we avoid creating a new instance.
         // As a result, [] is in fact less efficient than writing Block<int>.Empty.
         Block<int> empty = [];
         Assert.Same(Block<int>.Empty, empty);

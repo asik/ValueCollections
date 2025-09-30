@@ -166,22 +166,4 @@ public class EqualityTests
             Block.Create(new object(), new object()),
             Block.Create(new object(), new object()));
     }
-
-
-
-    //[Fact]
-    //void CompareTests()
-    //{
-    //    // Sanity
-    //    Assert.True(Block.Create(1) > Block<int>.Empty);
-    //    Assert.False(Block.Create(1) < Block<int>.Empty);
-    //    Assert.True(Block<int>.Empty < Block.Create(1));
-    //    Assert.False(Block<int>.Empty > Block.Create(1));
-
-    //    // Size
-    //    Assert.True(Block.Create(0, 0) > Block.Create(0));
-    //    Assert.True(Block.Create(1) < Block.Create(1, 1));
-
-    //    // Same size - First different element
-    //}
 }

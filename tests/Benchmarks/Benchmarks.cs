@@ -27,21 +27,21 @@ public class BlockBenchmarks
     //public Block<int> ConstructorFromList() => 
     //    new(sourceList);
 
-    //[Benchmark]
-    //public bool LargeIntBlockEquality() =>
-    //    largeIntBlock.Equals(largeIntBlockCopy);
+    [Benchmark]
+    public bool LargeIntBlockEquality() =>
+        largeIntBlock.Equals(largeIntBlockCopy);
 
-    //[Benchmark]
-    //public bool LargeIntArrayEquality() =>
-    //    largeIntArray.SequenceEqual(largeIntArrayCopy);
+    [Benchmark]
+    public bool LargeIntArrayEquality() =>
+        largeIntArray.SequenceEqual(largeIntArrayCopy);
 
-    //[Benchmark]
-    //public bool LargeStringBlockEquality() =>
-    //    largeStringBlock.Equals(largeStringBlockCopy);
+    [Benchmark]
+    public bool LargeStringBlockEquality() =>
+        largeStringBlock.Equals(largeStringBlockCopy);
 
-    //[Benchmark]
-    //public bool LargeStringSequenceEquals() =>
-    //    largeStringArray.SequenceEqual(largeStringArrayCopy);
+    [Benchmark]
+    public bool LargeStringSequenceEquals() =>
+        largeStringArray.SequenceEqual(largeStringArrayCopy);
 
     //[Benchmark]
     //public int GetHashCodeOnInts() =>

@@ -11,7 +11,6 @@ namespace ValueCollections;
 // 2025 update
 // - F# no longer plans on adding a "Block" type. https://github.com/fsharp/fslang-design/discussions/528#discussioncomment-5595874
 //      - Drop the weird name and call this "ValueArray" probably.
-// - Why do we need to use ImmutableArray internally instead of just a regular array, again?
 
 /// <summary>
 /// An immutable array with value equality. <see href="https://github.com/asik/ValueCollections#readme"/>
@@ -20,6 +19,17 @@ namespace ValueCollections;
 public partial class Block<T>
 {
     T[] _arr;
+
+    /// <summary>
+    /// Exposes the internal array. Exposed through <see cref="Unsafe.ValueCollectionsMarshal"/> only.
+    /// </summary>
+    internal T[] UnsafeInternalArray => _arr;
+
+    /// <summary>
+    /// Unsafe wrapping constructor. Exposed through <see cref="Unsafe.ValueCollectionsMarshal"/> only.
+    /// </summary>
+    internal Block(T[] arr) =>
+        _arr = arr;
 
     /// <summary>
     /// Creates a new <see cref="Block{T}"/> from a sequence of items.
@@ -41,12 +51,6 @@ public partial class Block<T>
     /// <param name="items">The elements to store in the array.</param>
     public Block(ReadOnlySpan<T> items) =>
         _arr = [.. items];
-
-    /// <summary>
-    /// Unsafe wrapping constructor. Exposed through <see cref="Unsafe.ValueCollectionsMarshal"/> only.
-    /// </summary>
-    internal Block(T[] arr) => 
-        _arr = arr;
 
     /// <summary>
     /// Creates a new <see cref="Block{T}"/> from an <see cref="ImmutableArray{T}"/>.
@@ -157,15 +161,12 @@ public static class Block
 
     /// <summary>
     /// Creates a new <see cref="Block{T}"/> from an <see cref="ImmutableArray{T}"/>.
-    /// Does not allocate a new array. 
-    /// Use this in combination with <see cref="ImmutableArray{T}.Builder.MoveToImmutable"/>
-    /// to build an array dynamically without an extra copy at the end to generate the <see cref="Block{T}"/>.
     /// </summary>
     /// <inheritdoc cref="ToBlock{T}(IEnumerable{T})"/>  
     public static Block<T> ToBlock<T>(this ImmutableArray<T> items) =>
         items.IsDefaultOrEmpty
             ? Block<T>.Empty
-            : new(items);
+            : new(ImmutableCollectionsMarshal.AsArray(items)!);
 
     /// <summary>
     /// Creates a new <see cref="Block{T}"/> from an array or an argument list of items.
