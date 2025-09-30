@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Runtime.InteropServices;
 using ValueCollections.Unsafe;
 
 namespace ValueCollections;

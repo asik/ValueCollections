@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ValueCollections.Unsafe;
+﻿namespace ValueCollections.Unsafe;
 
 
 
