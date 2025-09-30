@@ -1,16 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace ValueCollections;
 
-// IImmutableList<T> is not a great interface for us, with overloads taking IEqualityComparer<T>.
-// All the members also return IImmutableList<T>s rather than Block<T>, and cannot be implemented
-// by members returning Block<T>.
-// That said, I feel like it would be a shame not to be compatible with it
-// since we get it for free, so it's implemented explicitely.
+// Adding some methods from the Array class.
+// The rationale for inclusion here would be any combination of:
+// - The method is array-specific e.g. index operations
+// - It's not available in System.Linq
+// - If available in System.Linq, it can be made much faster by specializing it for our type
 
-public partial class Block<T> : IImmutableList<T>
+public partial class Block<T>
 {
     static void RequiresNonNull(object param, string paramName)
     {
@@ -22,7 +23,7 @@ public partial class Block<T> : IImmutableList<T>
 
     /// <inheritdoc cref="ImmutableArray{T}.LastIndexOf(T)"/>
     public int LastIndexOf(T item) =>
-        _arr.LastIndexOf(item);
+        Array.LastIndexOf(_arr, item);
 
     /// <summary>
     /// Searches for the first item that satisfies the given predicate.
@@ -39,7 +40,7 @@ public partial class Block<T> : IImmutableList<T>
     {
         RequiresNonNull(predicate, nameof(predicate));
 
-        for (var i = 0; i < _arr.Length; i++)
+        for (var i = 0; i<_arr.Length; i++)
         {
             if (predicate(_arr[i]))
             {
@@ -125,50 +126,4 @@ public partial class Block<T> : IImmutableList<T>
         }
         return -1;
     }
-
-
-
-    // Explicit implementations
-    IImmutableList<T> IImmutableList<T>.Clear() =>
-        Empty;
-
-    IImmutableList<T> IImmutableList<T>.Add(T value) =>
-        Append(value);
-
-    IImmutableList<T> IImmutableList<T>.AddRange(IEnumerable<T> items) =>
-        Append(items);
-
-    IImmutableList<T> IImmutableList<T>.Insert(int index, T element) =>
-        Insert(index, element);
-
-    IImmutableList<T> IImmutableList<T>.InsertRange(int index, IEnumerable<T> items) =>
-        Insert(index, items);
-
-    IImmutableList<T> IImmutableList<T>.Remove(T value, IEqualityComparer<T> equalityComparer) =>
-        _arr.Remove(value, equalityComparer).ToBlock();
-
-    IImmutableList<T> IImmutableList<T>.RemoveAll(Predicate<T> match) =>
-        _arr.RemoveAll(match).ToBlock();
-
-    IImmutableList<T> IImmutableList<T>.RemoveRange(IEnumerable<T> items, IEqualityComparer<T> equalityComparer) =>
-        _arr.RemoveRange(items, equalityComparer).ToBlock();
-
-    IImmutableList<T> IImmutableList<T>.RemoveRange(int index, int count) =>
-        _arr.RemoveRange(index, count).ToBlock();
-
-    IImmutableList<T> IImmutableList<T>.RemoveAt(int index) =>
-        RemoveAt(index);
-
-    IImmutableList<T> IImmutableList<T>.SetItem(int index, T value) =>
-        SetItem(index, value);
-
-    IImmutableList<T> IImmutableList<T>.Replace(T oldValue, T newValue, IEqualityComparer<T> equalityComparer) =>
-        _arr.Replace(oldValue, newValue, equalityComparer).ToBlock();
-
-    int IImmutableList<T>.IndexOf(T item, int index, int count, IEqualityComparer<T> equalityComparer) =>
-        _arr.IndexOf(item, index, count, equalityComparer);
-
-    int IImmutableList<T>.LastIndexOf(T item, int index, int count, IEqualityComparer<T> equalityComparer) =>
-        _arr.LastIndexOf(item, index, count, equalityComparer);
-
 }

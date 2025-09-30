@@ -8,15 +8,12 @@ using Xunit;
 
 namespace Tests;
 
-public class ImmutableArrayInterfaceTests
-{
-    readonly Block<int> emptyInstance = Block<int>.Empty;
-    readonly Block<string> nonEmptyBlock = Block.Create("a", "b", "c");
-    readonly Block<string> emptyBlock = Block<string>.Empty;
 
+public class ArrayTests
+{
     [Fact]
     void LengthEmpty() =>
-        Assert.Equal(0, emptyInstance.Length);
+        Assert.Equal(0, Block<int>.Empty.Length);
 
     [Fact]
     void EmptyIsEmpty() =>
@@ -101,18 +98,10 @@ public class ImmutableArrayInterfaceTests
         Assert.Equal(-1, idx);
     }
 
-    record A();
-
-    record B() : A;
-
     [Fact]
     void FindIndex_Found()
     {
         var source = Block.Create("a", "b", "b", "c");
-
-        var s = Block<A>.Empty;
-        var b = Block.Create("Hello");
-        ((IImmutableList<A>)s).AddRange(new[] { new B() });
         var expected = new[] { "a", "b" };
         var actual = new List<string>();
         var idx = source.FindIndex(item =>

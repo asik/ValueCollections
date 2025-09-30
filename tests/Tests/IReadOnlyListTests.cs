@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using ValueCollections;
 using Xunit;
 
@@ -32,5 +33,9 @@ public class IReadOnlyListTests
         }
         Assert.Equal(_block, elems);
     }
+
+    [Fact]
+    void ForEach_IsStructEnumerator() =>
+        Assert.True(_block.GetEnumerator().GetType().IsValueType);
 
 }

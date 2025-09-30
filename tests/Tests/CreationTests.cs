@@ -8,6 +8,8 @@ namespace Tests;
 
 public class CreationTests
 {
+    // TODO should we just make all constructors internal?
+
     [Fact]
     void ConstructorFromEnumerable() =>
         Assert.Equal(
@@ -72,7 +74,7 @@ public class CreationTests
     [Fact]
     void CollectionExpressionSpreadElementYieldsCorrectItems()
     {
-        var arr = new int[] { 4, 3, 2 };
+        var arr = new[] { 4, 3, 2 };
         Block<int> actual = [.. arr];
         Assert.Equal(Block.Create(4, 3, 2), actual);
     }
@@ -81,16 +83,16 @@ public class CreationTests
     void CollectionExpressionSpreadElementComplexYieldsCorrectItems()
     {
         Block<int> actual = [
-            .. new int[] { 4, 3, 2 }, 
+            .. new[] { 4, 3, 2 }, 
             1, 
-            .. new int[] { 0, -1 }];
+            .. new[] { 0, -1 }];
         Assert.Equal(Block.Create(4, 3, 2, 1, 0, -1), actual);
     }
 
     [Fact]
     void CollectionExpressionSpreadElementIntoOtherCollection()
     {
-        var source = new int[] { 5, 4, 3 };
+        var source = new[] { 5, 4, 3 };
         Block<int> arr = [.. source];
         Assert.Equal(source, arr);
     }

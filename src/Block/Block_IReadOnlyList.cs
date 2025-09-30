@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -19,9 +20,10 @@ public partial class Block<T> : IReadOnlyList<T>
     /// Returns an enumerator for the contents of the array.
     /// </summary>
     /// <returns>An enumerator.</returns>
-    public ImmutableArray<T>.Enumerator GetEnumerator() =>
+    //public ImmutableArray<T>.Enumerator GetEnumerator() =>
         // Leveraging ImmutableArray's highly optimized Enumerator implementation.
-        _arr.GetEnumerator();
+    //    throw new NotImplementedException();
+        //_arr.GetEnumerator();
 
     /// <summary>
     /// Returns an enumerator for the contents of the array.

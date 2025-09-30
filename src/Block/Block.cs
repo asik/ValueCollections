@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace ValueCollections;
 
@@ -15,19 +16,24 @@ namespace ValueCollections;
 /// <summary>
 /// An immutable array with value equality. <see href="https://github.com/asik/ValueCollections#readme"/>
 /// </summary>
-[CollectionBuilder(typeof(Block), "Create")]
+[CollectionBuilder(typeof(Block), nameof(Block.CreateRange))]
 public partial class Block<T>
 {
-    readonly ImmutableArray<T> _arr;
+    T[] _arr;
 
     /// <summary>
     /// Creates a new <see cref="Block{T}"/> from a sequence of items.
     /// </summary>
     /// <param name="items">The elements to store in the array.</param>
     public Block(IEnumerable<T> items) =>
-        // ImmutableArray is smart enough to check if it's a finite collection and pre-allocate if possible,
-        // so we don't need further overloads for collections.
-        _arr = ImmutableArray.CreateRange(items);
+        _arr = [.. items];
+
+    /// <summary>
+    /// Creates a new <see cref="Block{T}"/> from a sequence of items.
+    /// </summary>
+    /// <param name="items">The elements to store in the array.</param>
+    public Block(IReadOnlyCollection<T> items) =>
+        _arr = [.. items];
 
     /// <summary>
     /// Creates a new <see cref="Block{T}"/> from a <see cref="ReadOnlySpan{T}"/>.
@@ -37,19 +43,22 @@ public partial class Block<T>
         _arr = [.. items];
 
     /// <summary>
+    /// Unsafe wrapping constructor. Exposed through <see cref="Unsafe.ValueCollectionsMarshal"/> only.
+    /// </summary>
+    internal Block(T[] arr) => 
+        _arr = arr;
+
+    /// <summary>
     /// Creates a new <see cref="Block{T}"/> from an <see cref="ImmutableArray{T}"/>.
-    /// Does not allocate a new array. 
-    /// Use this in combination with <see cref="ImmutableArray{T}.Builder.MoveToImmutable"/>
-    /// to build an array dynamically without an extra copy at the end to generate the <see cref="Block{T}"/>.
     /// </summary>
     /// <param name="items">The elements to store in the array.</param>
     public Block(ImmutableArray<T> items) =>
         _arr = items.IsDefaultOrEmpty
-            ? ImmutableArray<T>.Empty
-            : items;
+            ? []
+            // It's safe to extract the underlying array since we won't mutate it either
+            : ImmutableCollectionsMarshal.AsArray(items)!;
 
     // Further optimizations: add single, two, three-element constructors for perf.
-    // Add support for IImmutableList
     // Add overloads for LINQ
     // Performance work:
     // - is equality via IStructuralEquatable ok? Can we do better when T: IEquatable<T>? - ANSWER: yes
@@ -62,7 +71,7 @@ public partial class Block<T>
 
     /// <inheritdoc cref="ImmutableArray{T}.Empty"/>
     public static readonly Block<T> Empty =
-        new(ImmutableArray<T>.Empty);
+        Unsafe.ValueCollectionsMarshal.AsBlock(Array.Empty<T>());
 
     /// <inheritdoc cref="ImmutableArray{T}.Length"/>
     public int Length =>
@@ -169,7 +178,7 @@ public static class Block
     /// Creates a new <see cref="Block{T}"/> from a <see cref="ReadOnlySpan{T}"/> of items.
     /// </summary>
     /// <inheritdoc cref="ToBlock{T}(IEnumerable{T})"/> 
-    public static Block<T> Create<T>(ReadOnlySpan<T> items) =>
+    public static Block<T> CreateRange<T>(ReadOnlySpan<T> items) =>
         items.Length == 0 
             ? Block<T>.Empty 
             : new Block<T>(items);
@@ -184,5 +193,6 @@ public static class Block
 
     /// <inheritdoc cref="ToBlock{T}(ImmutableArray{T})"/>
     public static Block<T> CreateRange<T>(ImmutableArray<T> items) =>
+        
         items.ToBlock();
 }

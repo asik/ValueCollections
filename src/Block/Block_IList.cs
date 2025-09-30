@@ -13,7 +13,7 @@ public partial class Block<T> : IList<T>
 {
     /// <inheritdoc cref="ImmutableArray{T}.IndexOf(T)"/>
     public int IndexOf(T item) =>
-        _arr.IndexOf(item);
+        Array.IndexOf(_arr, item);
 
     T IList<T>.this[int index]
     {

@@ -17,8 +17,8 @@ public partial class Block<T> : ICollection<T>
 
     bool ICollection<T>.Contains(T item) =>
         this.Contains(item);
-        // TODO consider adding Block<T>.Contains.
-        // System.Linq.Enumerable.Contains will correctly call this, but at the cost of a type check.
+    // TODO consider adding Block<T>.Contains.
+    // System.Linq.Enumerable.Contains will correctly call this, but at the cost of a type check.
 
     /// <inheritdoc cref="ImmutableArray{T}.CopyTo(T[], int)"/>
     /// <remarks>See also <see cref="Block{T}.Slice(int, int)"/> or ToArray().</remarks>
@@ -38,7 +38,12 @@ public partial class Block<T> : ICollection<T>
     /// <inheritdoc cref="ImmutableArray{T}.CopyTo(int, T[], int, int)"/>
     /// <remarks>See also <see cref="Block{T}.Slice(int, int)"/> or ToArray().</remarks>
     public void CopyTo(int sourceIndex, T[] destination, int destinationIndex, int length) =>
-        _arr.CopyTo(sourceIndex, destination, destinationIndex, length);
+        Array.Copy(
+            sourceArray: _arr, 
+            sourceIndex: sourceIndex, 
+            destinationArray: destination, 
+            destinationIndex: destinationIndex, 
+            length: length);
 
     bool ICollection<T>.Remove(T item) => throw new NotSupportedException();
 
