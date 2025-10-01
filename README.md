@@ -1,8 +1,8 @@
-`Block` is an immutable array with value equality, that is, two arrays are equal if they have the same contents.
+`ValueArray` is an immutable array with value equality, that is, two arrays are equal if they have the same contents.
 
-To install the [nuget package](https://www.nuget.org/packages/ValueCollections.Block):
+To install the [nuget package](https://www.nuget.org/packages/ValueCollections.ValueArray):
 ```
-dotnet add package ValueCollections.Block --prerelease
+dotnet add package ValueCollections.ValueArray --prerelease
 ```
 
 Example usage:
@@ -11,42 +11,47 @@ Example usage:
 using ValueCollections;
 
 // Equality based on contents, not references
-Block.Create(1, 2, 3) == Block.Create(1, 2, 3); // true
+ValueArray.Create(1, 2, 3) == ValueArray.Create(1, 2, 3); // true
 
 // This holds whether it is stored in a record, a tuple, 
 // or anything else that compares using default equality comparers.
-record DataBlock(Block<string> Entries);
+record DataBlock(
+    ValueArray<string> Entries
+);
 
-var db0 = new DataBlock(Block.Create("a", "b"));
-var db1 = new DataBlock(Block.Create("a", "b"));
+var db0 = new DataBlock(ValueArray.Create("a", "b"));
+var db1 = new DataBlock(ValueArray.Create("a", "b"));
 db0 == db1 // true
 
 // Works as a key in Dictionary, HashMap or anything that uses GetHashCode.
-var dict = new Dictionary<Block<int>, string>
+var dict = new Dictionary<ValueArray<int>, string>
 {
-    [Block.Create(1, 2, 3)] = "Entry1"
+    [ValueArray.Create(1, 2, 3)] = "Entry1"
 };
-dict[Block.Create(1, 2, 3)]; // "Entry1"
+dict[ValueArray.Create(1, 2, 3)]; // "Entry1"
 
 // Nice, structural "ToString()" recursively prints nested data,
 // making it a joy to use in scripting, logging and debugging.
-Block.Create(new[] { 1, 2, 3 }, new[] { 4, 5, 6 }).ToString()
-"Block(2) { Array(3) { 1, 2, 3 }, Array(3) { 4, 5, 6 } }"
+ValueArray.Create(new[] { 1, 2, 3 }, new[] { 4, 5, 6 }).ToString()
+"ValueArray(2) { Array(3) { 1, 2, 3 }, Array(3) { 4, 5, 6 } }"
 
 // Supports C# 8 slices and ranges:
-var slice = block[1..^1];
+var slice = valueArray[1..^1];
+
+// Supports C# 12 collection expressions*:
+ValueArray<int> valueArray = [..span0, item, ..span1];
 
 // Seamless interop to and from LINQ:
-Block<int> items = Block.Create(1, 2, 3);
-Block<int> oddsSquared = items.Where(i => i % 2 == 1).Select(i => i * i).ToBlock();
-"Block(2) { 1, 9 }"
+ValueArray<int> items = ValueArray.Create(1, 2, 3);
+ValueArray<int> oddsSquared = items.Where(i => i % 2 == 1).Select(i => i * i).ToValueArray();
+"ValueArray(2) { 1, 9 }"
 
 // Update operations are non-destructive:
-var newBlock = block.Append(item); // does not modify the original
-var newBlock = block.SetItem(2, item); // use this instead of block[2] = item;
+var newValueArray = valueArray.Append(item); // does not modify the original
+var newValueArray = valueArray.SetItem(2, item); // use this instead of valueArray[2] = item;
 ```
 
-__`Block` is highly unstable and experimental at this stage.__
+__`ValueArray` is highly unstable and experimental at this stage.__
 Not every method is yet covered by unit tests. The design might still change.
 
 ### Why do we need this?
@@ -59,9 +64,6 @@ type that compares by value too.
 [for](https://stackoverflow.com/q/71008787)
 [this](https://stackoverflow.com/q/70304163).
 
-### Why the name `Block`?
-It's short and it's consistent with the equivalent [planned F# feature also based on `ImmutableArray`](https://github.com/fsharp/fslang-design/blob/main/RFCs/FS-1094-block.md).
-
 ### Why should it be immutable?
 Anything that supports equality should be immutable, since it can be used as keys in dictionaries and maps. In a DDD sense, this type represents a value, not an entity.
 
@@ -69,28 +71,26 @@ Anything that supports equality should be immutable, since it can be used as key
 Value types support `default` initialization, which would be an invalid state for this type 
 (it would throw `NullReferenceException` when you'd' try to do anything with it).
 This is easy to run into and the compiler wouldn't be able to help you spot it.
-`ImmutableArray` seems to cater to experts writing low-allocation code (e.g. Roslyn); `Block` tries to be more general-purpose.
+`ImmutableArray` seems to cater to experts writing low-allocation code (e.g. Roslyn); `ValueArray` tries to be more general-purpose.
 
-### Won't this be slow compared to `T[]`?
-It leverages optimizations in `ImmutableArray` to make `for` and `foreach` as fast as or faster than any other collection.
+### Performance considerations
+`foreach` is optimized not to allocate and the performance is on par with native arrays.
 
-It tries to leverage available optimizations in LINQ as well.
+We try to leverage available optimizations in LINQ as well, allowing casts to `ICollection` and `IList` (but you should not use these interfaces).
 
-Equality is as fast or faster than `SequenceEquals`, except for arrays of blittable types, which .NET optimizes to a memcmp.
+Of course Equality and `GetHashCode` become O(n) since they have to consider all elements.
 
-`GetHashCode` is fast but O(n) since it considers all elements.
+Equality leverages all optimizations in `Enumerable.SequenceEquals`, e.g. arrays of blittable structs get optimized to a memcmp.
+
+`GetHashCode` relies on `System.HashCode` for security and performance.
 
 `ToString` strongly optimizes for usefulness over speed. It should be fine for logging, but if squeezing every bit of performance matters,
 you might want to implement your own.
 
-### How can I customize equality?
-Derive from the type, implement `IEquatable<T>.Equals` and override `GetHashCode` so that two instances that compare equal also return the same hash code.
+* Perf warning: note that collection expressions are less efficient than using the type's own methods directly. `[]` incurs a run-time length check, `ValueArray<T>.Empty` does not. Object spread syntax incurs a redundant temporary copy, `ValueArray.Create` and `ValueArray.ToValueArray` don't. For the technical details, see [this issue](https://github.com/dotnet/csharplang/discussions/9697) on the C# design repo. Please upvote it if this matters to you.
 
-Alternatively, the `IImutableList` interface provides some methods that allow you to pass an `EqualityComparer`.
-
-I'm aware that this is not great, but that's also how records and tuples work. 
-Allowing you to pass an `EqualityComparer` at creation would significantly alter and complicate the design of this type, I think.
+### Can I provide a custom comparer?
+No. I may consider adding this feature at a later point.
 
 ### Can I use this on .NET Framework?
-Yes, provided you are using a .NET Standard 2.0 compatible version (4.6.2 and above, I believe.)
-Side note: you can use records on .NET Framework.
+Yes, provided you are using a .NET Standard 2.0 compatible version.

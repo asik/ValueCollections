@@ -54,9 +54,9 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Block\ValueCollections.Block.csproj">
+    <ProjectReference Include="..\..\src\Block\ValueCollections.ValueArray.csproj">
       <Project>{7fa6e721-18cd-43d9-808f-33363e0a902d}</Project>
-      <Name>ValueCollections.Block</Name>
+      <Name>ValueCollections.ValueArray</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

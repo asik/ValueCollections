@@ -9,7 +9,7 @@ namespace ValueCollections;
 // Similar to ICollection, we support this to benefit from hardcoded optimizations in LINQ,
 // but of course we can't support the mutating members.
 
-public partial class Block<T> : IList<T>
+public partial class ValueArray<T> : IList<T>
 {
     /// <inheritdoc cref="ImmutableArray{T}.IndexOf(T)"/>
     public int IndexOf(T item) =>

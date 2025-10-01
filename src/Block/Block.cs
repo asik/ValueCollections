@@ -8,15 +8,11 @@ using System.Runtime.InteropServices;
 
 namespace ValueCollections;
 
-// 2025 update
-// - F# no longer plans on adding a "Block" type. https://github.com/fsharp/fslang-design/discussions/528#discussioncomment-5595874
-//      - Drop the weird name and call this "ValueArray" probably.
-
 /// <summary>
 /// An immutable array with value equality. <see href="https://github.com/asik/ValueCollections#readme"/>
 /// </summary>
-[CollectionBuilder(typeof(Block), nameof(Block.CreateRange))]
-public partial class Block<T>
+[CollectionBuilder(typeof(ValueArray), nameof(ValueArray.CreateRange))]
+public partial class ValueArray<T>
 {
     T[] _arr;
 
@@ -28,35 +24,35 @@ public partial class Block<T>
     /// <summary>
     /// Unsafe wrapping constructor. Exposed publicly through <see cref="Unsafe.ValueCollectionsMarshal"/> only.
     /// </summary>
-    internal Block(T[] arr) =>
+    internal ValueArray(T[] arr) =>
         _arr = arr;
 
     /// <summary>
-    /// Creates a new <see cref="Block{T}"/> from a sequence of items.
+    /// Creates a new <see cref="ValueArray{T}"/> from a sequence of items.
     /// </summary>
     /// <param name="items">The elements to store in the array.</param>
-    public Block(IEnumerable<T> items) =>
+    public ValueArray(IEnumerable<T> items) =>
         _arr = [.. items];
 
     /// <summary>
-    /// Creates a new <see cref="Block{T}"/> from a sequence of items.
+    /// Creates a new <see cref="ValueArray{T}"/> from a sequence of items.
     /// </summary>
     /// <param name="items">The elements to store in the array.</param>
-    public Block(IReadOnlyCollection<T> items) =>
+    public ValueArray(IReadOnlyCollection<T> items) =>
         _arr = [.. items];
 
     /// <summary>
-    /// Creates a new <see cref="Block{T}"/> from a <see cref="ReadOnlySpan{T}"/>.
+    /// Creates a new <see cref="ValueArray{T}"/> from a <see cref="ReadOnlySpan{T}"/>.
     /// </summary>
     /// <param name="items">The elements to store in the array.</param>
-    public Block(ReadOnlySpan<T> items) =>
+    public ValueArray(ReadOnlySpan<T> items) =>
         _arr = [.. items];
 
     /// <summary>
-    /// Creates a new <see cref="Block{T}"/> from an <see cref="ImmutableArray{T}"/>.
+    /// Creates a new <see cref="ValueArray{T}"/> from an <see cref="ImmutableArray{T}"/>.
     /// </summary>
     /// <param name="items">The elements to store in the array.</param>
-    public Block(ImmutableArray<T> items) =>
+    public ValueArray(ImmutableArray<T> items) =>
         _arr = items.IsDefaultOrEmpty
             ? []
             // It's safe to extract the underlying array since we won't mutate it either
@@ -64,18 +60,14 @@ public partial class Block<T>
 
     // Further optimizations: add single, two, three-element constructors for perf.
     // Add overloads for LINQ
-    // Performance work:
-    // - is equality via IStructuralEquatable ok? Can we do better when T: IEquatable<T>? - ANSWER: yes
-    // - can we improve serialization/deserialization perf with a constructor for BlockJsonConverter that takes in JsonSerializerOptions?
-    //   https://makolyte.com/dotnet-jsonserializer-is-over-200x-faster-if-you-reuse-jsonserializeroptions/
     // Questionable interfaces:
     // - ICollection, IList - these are terrible, but *sigh* some LINQ optimisations rely on these to provide a .Count property.
     // - IStructuralEquality - do we need this if we're already structurally comparable via IEquatable?
     // - IStructuralComparable - does it really make sense to order arrays? What's the use case? OrderedSet? F# does it though.
 
     /// <inheritdoc cref="ImmutableArray{T}.Empty"/>
-    public static readonly Block<T> Empty =
-        Unsafe.ValueCollectionsMarshal.AsBlock(Array.Empty<T>());
+    public static readonly ValueArray<T> Empty =
+        Unsafe.ValueCollectionsMarshal.AsValueArray(Array.Empty<T>());
 
     /// <inheritdoc cref="ImmutableArray{T}.Length"/>
     public int Length =>
@@ -132,68 +124,68 @@ public partial class Block<T>
         }
         elementString = Length == 0 ? "{ }" : $"{{ {elementString} }}";
 
-        return $"Block({Length}) {elementString}";
+        return $"ValueArray({Length}) {elementString}";
     }
 }
 
 /// <summary>
-/// A set of initialization methods for instances of <see cref="Block{T}"/>.
+/// A set of initialization methods for instances of <see cref="ValueArray{T}"/>.
 /// </summary>
-public static class Block
+public static class ValueArray
 {
     /// <summary>
-    /// Creates a new <see cref="Block{T}"/> from a sequence of items.
+    /// Creates a new <see cref="ValueArray{T}"/> from a sequence of items.
     /// </summary>
     /// <typeparam name="T">The type of element stored in the array.</typeparam>
     /// <param name="items">The elements to store in the array.</param>
-    /// <returns>A <see cref="Block{T}"/> containing the items provided.</returns>
-    public static Block<T> ToBlock<T>(this IEnumerable<T> items) =>
+    /// <returns>A <see cref="ValueArray{T}"/> containing the items provided.</returns>
+    public static ValueArray<T> ToValueArray<T>(this IEnumerable<T> items) =>
         new(items);
 
     /// <summary>
-    /// Creates a new <see cref="Block{T}"/> from a collection of items.
+    /// Creates a new <see cref="ValueArray{T}"/> from a collection of items.
     /// </summary>
-    /// <inheritdoc cref="ToBlock{T}(IEnumerable{T})"/>    
-    public static Block<T> ToBlock<T>(this IReadOnlyCollection<T> items) =>
+    /// <inheritdoc cref="ToValueArray{T}(IEnumerable{T})"/>    
+    public static ValueArray<T> ToValueArray<T>(this IReadOnlyCollection<T> items) =>
         items.Count == 0
-            ? Block<T>.Empty
+            ? ValueArray<T>.Empty
             : new(items);
 
     /// <summary>
-    /// Creates a new <see cref="Block{T}"/> from an <see cref="ImmutableArray{T}"/>.
+    /// Creates a new <see cref="ValueArray{T}"/> from an <see cref="ImmutableArray{T}"/>.
     /// </summary>
-    /// <inheritdoc cref="ToBlock{T}(IEnumerable{T})"/>  
-    public static Block<T> ToBlock<T>(this ImmutableArray<T> items) =>
+    /// <inheritdoc cref="ToValueArray{T}(IEnumerable{T})"/>  
+    public static ValueArray<T> ToValueArray<T>(this ImmutableArray<T> items) =>
         items.IsDefaultOrEmpty
-            ? Block<T>.Empty
+            ? ValueArray<T>.Empty
             : new(ImmutableCollectionsMarshal.AsArray(items)!);
 
     /// <summary>
-    /// Creates a new <see cref="Block{T}"/> from an array or an argument list of items.
+    /// Creates a new <see cref="ValueArray{T}"/> from an array or an argument list of items.
     /// </summary>
-    /// <inheritdoc cref="ToBlock{T}(IEnumerable{T})"/> 
-    public static Block<T> Create<T>(params T[] items) =>
-        items.ToBlock();
+    /// <inheritdoc cref="ToValueArray{T}(IEnumerable{T})"/> 
+    public static ValueArray<T> Create<T>(params T[] items) =>
+        items.ToValueArray();
 
     /// <summary>
-    /// Creates a new <see cref="Block{T}"/> from a <see cref="ReadOnlySpan{T}"/> of items.
+    /// Creates a new <see cref="ValueArray{T}"/> from a <see cref="ReadOnlySpan{T}"/> of items.
     /// </summary>
-    /// <inheritdoc cref="ToBlock{T}(IEnumerable{T})"/> 
-    public static Block<T> CreateRange<T>(ReadOnlySpan<T> items) =>
+    /// <inheritdoc cref="ToValueArray{T}(IEnumerable{T})"/> 
+    public static ValueArray<T> CreateRange<T>(ReadOnlySpan<T> items) =>
         items.Length == 0 
-            ? Block<T>.Empty 
-            : new Block<T>(items);
+            ? ValueArray<T>.Empty 
+            : new ValueArray<T>(items);
 
-    /// <inheritdoc cref="ToBlock{T}(IEnumerable{T})"/> 
-    public static Block<T> CreateRange<T>(IEnumerable<T> items) =>
-        items.ToBlock();
+    /// <inheritdoc cref="ToValueArray{T}(IEnumerable{T})"/> 
+    public static ValueArray<T> CreateRange<T>(IEnumerable<T> items) =>
+        items.ToValueArray();
 
-    /// <inheritdoc cref="ToBlock{T}(IReadOnlyCollection{T})"/> 
-    public static Block<T> CreateRange<T>(IReadOnlyCollection<T> items) =>
-        items.ToBlock();
+    /// <inheritdoc cref="ToValueArray{T}(IReadOnlyCollection{T})"/> 
+    public static ValueArray<T> CreateRange<T>(IReadOnlyCollection<T> items) =>
+        items.ToValueArray();
 
-    /// <inheritdoc cref="ToBlock{T}(ImmutableArray{T})"/>
-    public static Block<T> CreateRange<T>(ImmutableArray<T> items) =>
+    /// <inheritdoc cref="ToValueArray{T}(ImmutableArray{T})"/>
+    public static ValueArray<T> CreateRange<T>(ImmutableArray<T> items) =>
         
-        items.ToBlock();
+        items.ToValueArray();
 }

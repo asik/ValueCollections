@@ -4,40 +4,40 @@ using ValueCollections;
 namespace Benchmarks;
 
 [MemoryDiagnoser]
-public class BlockBenchmarks
+public class ValueArrayBenchmarks
 {
     private const int largeSize = 100000;
-    private readonly Block<int> largeIntBlock = Enumerable.Range(0, largeSize).ToBlock();
-    private readonly Block<int> largeIntBlockCopy = Enumerable.Range(0, largeSize).ToBlock();
+    private readonly ValueArray<int> largeIntValueArray = Enumerable.Range(0, largeSize).ToValueArray();
+    private readonly ValueArray<int> largeIntValueArrayCopy = Enumerable.Range(0, largeSize).ToValueArray();
     private readonly int[] largeIntArray = Enumerable.Range(0, largeSize).ToArray();
     private readonly int[] largeIntArrayCopy = Enumerable.Range(0, largeSize).ToArray();
-    private readonly Block<string> largeStringBlock = Enumerable.Range(0, largeSize).Select(i => i.ToString()).ToBlock();
-    private readonly Block<string> largeStringBlockCopy = Enumerable.Range(0, largeSize).Select(i => i.ToString()).ToBlock();
+    private readonly ValueArray<string> largeStringValueArray = Enumerable.Range(0, largeSize).Select(i => i.ToString()).ToValueArray();
+    private readonly ValueArray<string> largeStringValueArrayCopy = Enumerable.Range(0, largeSize).Select(i => i.ToString()).ToValueArray();
     private readonly string[] largeStringArray = Enumerable.Range(0, largeSize).Select(i => i.ToString()).ToArray();
     private readonly string[] largeStringArrayCopy = Enumerable.Range(0, largeSize).Select(i => i.ToString()).ToArray();
-    private readonly Block<int> blockCopy = Block.Create(1, 2, 3);
+    private readonly ValueArray<int> ValueArrayCopy = ValueArray.Create(1, 2, 3);
     private readonly List<int> sourceList = new() { 1, 2, 3 };
     private readonly int[] sourceArray = new[] { 1, 2, 3 };
 
     //[Benchmark]
-    //public Block<int> ConstructorFromArray() => 
+    //public ValueArray<int> ConstructorFromArray() => 
     //    new(sourceArray);
 
     //[Benchmark]
-    //public Block<int> ConstructorFromList() => 
+    //public ValueArray<int> ConstructorFromList() => 
     //    new(sourceList);
 
     //[Benchmark]
-    //public bool LargeIntBlockEquality() =>
-    //    largeIntBlock.Equals(largeIntBlockCopy);
+    //public bool LargeIntValueArrayEquality() =>
+    //    largeIntValueArray.Equals(largeIntValueArrayCopy);
 
     //[Benchmark]
     //public bool LargeIntArrayEquality() =>
     //    largeIntArray.SequenceEqual(largeIntArrayCopy);
 
     //[Benchmark]
-    //public bool LargeStringBlockEquality() =>
-    //    largeStringBlock.Equals(largeStringBlockCopy);
+    //public bool LargeStringValueArrayEquality() =>
+    //    largeStringValueArray.Equals(largeStringValueArrayCopy);
 
     //[Benchmark]
     //public bool LargeStringSequenceEquals() =>
@@ -45,21 +45,21 @@ public class BlockBenchmarks
 
     //[Benchmark]
     //public int GetHashCodeOnInts() =>
-    //    block.GetHashCode();
+    //    valueArray.GetHashCode();
 
     //[Benchmark]
-    //public Block<int> CreateFromArray() =>
-    //    Block.Create(sourceArray);
+    //public ValueArray<int> CreateFromArray() =>
+    //    ValueArray.Create(sourceArray);
 
     //[Benchmark]
-    //public Block<int> CreateRange() =>
-    //    Block.CreateRange(sourceList);
+    //public ValueArray<int> CreateRange() =>
+    //    ValueArray.CreateRange(sourceList);
 
     [Benchmark]
     public void ForEachIteration()
     {
         int sum = 0;
-        foreach(var _item in largeIntBlock)
+        foreach(var _item in largeIntValueArray)
         {
             sum += _item;
         }
@@ -80,7 +80,7 @@ public class BlockBenchmarks
     Via IStructuralEquatable:
     |                Method |        Mean |      Error |     StdDev |    Gen 0 |   Allocated |
     |---------------------- |------------:|-----------:|-----------:|---------:|------------:|
-    | LargeIntBlockEquality | 9,006.72 us | 137.606 us | 121.984 us | 750.0000 | 4,800,032 B |
+    | LargeIntvalueArrayEquality | 9,006.72 us | 137.606 us | 121.984 us | 750.0000 | 4,800,032 B |
     | LargeIntArrayEquality |    16.53 us |   0.285 us |   0.484 us |        - |           - |
 
     Via directly calling EqualityComparer<T>.Default.Compare:
@@ -105,8 +105,8 @@ public class BlockBenchmarks
     | LargeStringArrayEquality | 895.4 us | 16.63 us | 33.21 us |         - |
 
     So basically Array equality has an optimization for blittable types where it is implemented as a memcmp, and
-    this makes it 10 times faster in that case. However, to support this, we'd have to implement Block<T> on top
-    of T[] directly which is a lot more work. As it stands, Block<T> equality is generally on par or better than
+    this makes it 10 times faster in that case. However, to support this, we'd have to implement ValueArray<T> on top
+    of T[] directly which is a lot more work. As it stands, ValueArray<T> equality is generally on par or better than
     SequenceEquals, so other things will take priority over a total rewrite to get that memcmp optimization.
 
     Some results for HashCode:

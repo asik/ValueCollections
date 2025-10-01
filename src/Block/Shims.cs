@@ -10,16 +10,3 @@ namespace System.Runtime.CompilerServices
     sealed class CollectionBuilderAttribute(Type builderType, string methodName) : Attribute { }
 #pragma warning restore CS9113 // Parameter is unread.
 }
-
-namespace ValueCollections
-{
-    public class A
-    {
-        public string? Field = null;
-        public string? Property { get; set; }
-        public A? this[int index]
-        {
-            get => null;
-        }
-    }
-}

@@ -8,7 +8,7 @@ namespace ValueCollections;
 // - It's not available in System.Linq
 // - If available in System.Linq, it can be made much faster by specializing it for our type
 
-public partial class Block<T>
+public partial class ValueArray<T>
 {
     static void RequiresNonNull(object param, string paramName)
     {
@@ -26,7 +26,7 @@ public partial class Block<T>
     /// <summary> 
     /// Searches for an element that matches the conditions defined by the specified
     /// predicate, and returns the zero-based index of the first occurrence within the
-    /// entire <see cref="Block{T}"/>.
+    /// entire <see cref="ValueArray{T}"/>.
     /// </summary>
     /// <param name="match">
     /// A function that takes in an item 
@@ -50,7 +50,7 @@ public partial class Block<T>
     /// <summary> 
     /// Searches for an element that matches the conditions defined by the specified
     /// predicate, and returns the zero-based index of the first occurrence within the
-    /// entire <see cref="Block{T}"/>.
+    /// entire <see cref="ValueArray{T}"/>.
     /// </summary>
     /// <param name="match">
     /// A function that takes in an item and its index, 
@@ -74,7 +74,7 @@ public partial class Block<T>
     /// <summary> 
     /// Searches for an element that matches the conditions defined by the specified
     /// predicate, and returns the zero-based index of the last occurrence within the
-    /// entire <see cref="Block{T}"/>.
+    /// entire <see cref="ValueArray{T}"/>.
     /// </summary>
     /// <param name="match">
     /// A function that takes in an item, and returns whether it is the one we are looking for.
@@ -97,7 +97,7 @@ public partial class Block<T>
     /// <summary> 
     /// Searches for an element that matches the conditions defined by the specified
     /// predicate, and returns the zero-based index of the last occurrence within the
-    /// entire <see cref="Block{T}"/>.
+    /// entire <see cref="ValueArray{T}"/>.
     /// </summary>
     /// <param name="match">
     /// A function that takes in an item and its index, and returns whether it is the one we are looking for.

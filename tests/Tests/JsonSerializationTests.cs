@@ -10,16 +10,16 @@ public class JsonSerializationTests
     [Fact]
     void CanSerializeAndDeserializeBackOutOfTheBox()
     {
-        var original = Block.Create(1, 2, 3);
+        var original = ValueArray.Create(1, 2, 3);
         var serialized = JsonSerializer.Serialize(original);
         var deserialized =
-            JsonSerializer.Deserialize<Block<int>>(serialized);
+            JsonSerializer.Deserialize<ValueArray<int>>(serialized);
 
         Assert.Equal(original, deserialized);
     }
 
     record InnerType(string A);
-    record ComplexType(string A, int B, Block<InnerType> Inner);
+    record ComplexType(string A, int B, ValueArray<InnerType> Inner);
 
     [Fact]
     void CanSerializeAndDeserializeComplexType()
@@ -27,7 +27,7 @@ public class JsonSerializationTests
         var original = new ComplexType(
             A: "abc",
             B: 3,
-            Inner: Block.Create(new InnerType("w"), new InnerType("h")));
+            Inner: ValueArray.Create(new InnerType("w"), new InnerType("h")));
 
         var serialized = JsonSerializer.Serialize(original);
         var deserialized =
@@ -39,11 +39,11 @@ public class JsonSerializationTests
     [Fact]
     void CanSerializeAndDeserializeEmptyArray()
     {
-        var serialized = JsonSerializer.Serialize(Block<int>.Empty);
+        var serialized = JsonSerializer.Serialize(ValueArray<int>.Empty);
         var deserialized =
-            JsonSerializer.Deserialize<Block<int>>(serialized);
+            JsonSerializer.Deserialize<ValueArray<int>>(serialized);
 
-        Assert.Same(Block<int>.Empty, deserialized);
+        Assert.Same(ValueArray<int>.Empty, deserialized);
     }
 
     [Fact]
@@ -51,11 +51,11 @@ public class JsonSerializationTests
         Assert.Equal(
             "[1,2,3]",
             JsonSerializer.Serialize(
-                Block.Create(1, 2, 3)));
+                ValueArray.Create(1, 2, 3)));
 
     [Fact]
     void SerializesEmptyAsAnEmptyArray() =>
         Assert.Equal(
             "[]",
-            JsonSerializer.Serialize(Block<int>.Empty));
+            JsonSerializer.Serialize(ValueArray<int>.Empty));
 }

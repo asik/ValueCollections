@@ -13,7 +13,7 @@ I think the vast majority of use cases for this type will be simple updates wher
 For lots of updates where perf matters, you can use something mutable.
 
 Advantages of `ImmutableArray` that we would lose by going to `ImmutableList`:
-- Consistency with planned F# Block type
+- Consistency with planned F# ValueArray type
 - Array-like performance in creation, iteration
 - 0 GC overhead over the underlying array (less overhead than `List<T>`!)
 
@@ -34,7 +34,7 @@ C# now has nullability checking for reference types, making them much safer than
 With nullability checking, reference type also offer a correctness advantage that structs lack: the compiler 
 warns if they're left uninitialized.
 
-However, making it a reference means two allocations per instance instead of one. This means using Block<T>
+However, making it a reference means two allocations per instance instead of one. This means using ValueArray<T>
 creates more GC pressure, leading to more frequent GC. However, this is true of every collection type outside of
 plain arrays.
 

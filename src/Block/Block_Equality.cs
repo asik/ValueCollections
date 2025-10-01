@@ -4,17 +4,17 @@ using System.Linq;
 
 namespace ValueCollections;
 
-public partial class Block<T> : IEquatable<Block<T>>
+public partial class ValueArray<T> : IEquatable<ValueArray<T>>
 {
     /// <inheritdoc />
-    public bool Equals(Block<T> other) =>
+    public bool Equals(ValueArray<T> other) =>
         // This has a bunch of useful optimizations and may keep improving in future .NET versions.
         // For arrays of blittable types e.g. int, it uses memcmp efficiently. 
         _arr.SequenceEqual(other._arr);
 
     /// <inheritdoc />
     public override bool Equals(object obj) =>
-        obj is Block<T> other && Equals(other);
+        obj is ValueArray<T> other && Equals(other);
 
     /// <inheritdoc />
     public override int GetHashCode()
@@ -43,10 +43,10 @@ public partial class Block<T> : IEquatable<Block<T>>
     }
 
     /// <inheritdoc />
-    public static bool operator ==(Block<T> left, Block<T> right) =>
+    public static bool operator ==(ValueArray<T> left, ValueArray<T> right) =>
         left.Equals(right);
 
     /// <inheritdoc />
-    public static bool operator !=(Block<T> left, Block<T> right) =>
+    public static bool operator !=(ValueArray<T> left, ValueArray<T> right) =>
         !left.Equals(right);
 }

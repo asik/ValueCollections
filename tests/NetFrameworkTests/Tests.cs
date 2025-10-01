@@ -9,7 +9,7 @@ namespace NetFrameworkTests
         [TestMethod]
         public void Sanity()
         {
-            Assert.AreEqual(Block.Create(1, 2, 3), Block.Create(1, 2, 3));
+            Assert.AreEqual(ValueArray.Create(1, 2, 3), ValueArray.Create(1, 2, 3));
         }
     }
 }

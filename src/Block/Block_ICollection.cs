@@ -9,7 +9,7 @@ namespace ValueCollections;
 // and avoid enumerating in some cases. It also uses ICollection.CopyTo. 
 // Of course we can't support any of the mutating methods on this.
 
-public partial class Block<T> : ICollection<T>
+public partial class ValueArray<T> : ICollection<T>
 {
     void ICollection<T>.Add(T item) => throw new NotSupportedException();
 
@@ -17,11 +17,11 @@ public partial class Block<T> : ICollection<T>
 
     bool ICollection<T>.Contains(T item) =>
         this.Contains(item);
-    // TODO consider adding Block<T>.Contains.
+    // TODO consider adding ValueArray<T>.Contains.
     // System.Linq.Enumerable.Contains will correctly call this, but at the cost of a type check.
 
     /// <inheritdoc cref="ImmutableArray{T}.CopyTo(T[], int)"/>
-    /// <remarks>See also <see cref="Block{T}.Slice(int, int)"/> or ToArray().</remarks>
+    /// <remarks>See also <see cref="ValueArray{T}.Slice(int, int)"/> or ToArray().</remarks>
     public void CopyTo(T[] destination, int destinationIndex) =>
         // This implements ICollection<T>.CopyTo. It could be useful as an alternative to slicing
         // for low-allocation code, and I don't want to give anyone a good reason to cast to ICollection<T>,
@@ -31,12 +31,12 @@ public partial class Block<T> : ICollection<T>
         _arr.CopyTo(destination, destinationIndex);
 
     /// <inheritdoc cref="ImmutableArray{T}.CopyTo(T[])"/>
-    /// <remarks>See also <see cref="Block{T}.Slice(int, int)"/> or ToArray().</remarks>
+    /// <remarks>See also <see cref="ValueArray{T}.Slice(int, int)"/> or ToArray().</remarks>
     public void CopyTo(T[] destination) =>
         _arr.CopyTo(destination);
 
     /// <inheritdoc cref="ImmutableArray{T}.CopyTo(int, T[], int, int)"/>
-    /// <remarks>See also <see cref="Block{T}.Slice(int, int)"/> or ToArray().</remarks>
+    /// <remarks>See also <see cref="ValueArray{T}.Slice(int, int)"/> or ToArray().</remarks>
     public void CopyTo(int sourceIndex, T[] destination, int destinationIndex, int length) =>
         Array.Copy(
             sourceArray: _arr, 

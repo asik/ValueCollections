@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace ValueCollections;
 
-public partial class Block<T> : IReadOnlyList<T>
+public partial class ValueArray<T> : IReadOnlyList<T>
 {
     /// <inheritdoc />
     public T this[int index] =>
@@ -18,6 +18,13 @@ public partial class Block<T> : IReadOnlyList<T>
     /// <summary>
     /// Returns an enumerator for the contents of the array.
     /// </summary>
+    /// <remarks>
+    /// This is an optimization. The type works fine without this. 
+    /// It eliminates the overhead of an enumerator object in this common scenario:
+    /// <code>
+    /// foreach(ValueArray{T} item in valueArray) {}
+    /// </code>
+    /// </remarks>
     /// <returns>An enumerator.</returns>
     public Enumerator GetEnumerator() =>
         new(_arr);

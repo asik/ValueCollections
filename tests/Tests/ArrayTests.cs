@@ -11,20 +11,20 @@ public class ArrayTests
 {
     [Fact]
     void LengthEmpty() =>
-        Assert.Equal(0, Block<int>.Empty.Length);
+        Assert.Equal(0, ValueArray<int>.Empty.Length);
 
     [Fact]
     void EmptyIsEmpty() =>
-        Assert.Equal(Array.Empty<int>(), Block<int>.Empty);
+        Assert.Equal(Array.Empty<int>(), ValueArray<int>.Empty);
 
     [Fact]
     void EmptyIsSingleton() =>
-        Assert.Same(Block<int>.Empty, Block<int>.Empty);
+        Assert.Same(ValueArray<int>.Empty, ValueArray<int>.Empty);
 
     [Fact]
     void FindIndexi_NotFound()
     {
-        var source = Block.Create("a", "b", "b", "c");
+        var source = ValueArray.Create("a", "b", "b", "c");
         var expected = source.Select((item, i) => (item, i));
         var actual = new List<(string, int)>();
         var idx = source.FindIndex((item, i) =>
@@ -39,7 +39,7 @@ public class ArrayTests
     [Fact]
     void FindIndexi_Found()
     {
-        var source = Block.Create("a", "b", "b", "c");
+        var source = ValueArray.Create("a", "b", "b", "c");
         var expected = new[] { ("a", 0), ("b", 1) };
         var actual = new List<(string, int)>();
         var idx = source.FindIndex((item, i) =>
@@ -54,7 +54,7 @@ public class ArrayTests
     [Fact]
     void FindLastIndexi_NotFound()
     {
-        var source = Block.Create("a", "b", "b", "c");
+        var source = ValueArray.Create("a", "b", "b", "c");
         var expected = new[] { ("c", 3), ("b", 2), ("b", 1), ("a", 0) };
         var actual = new List<(string, int)>();
         var idx = source.FindLastIndex((item, i) =>
@@ -69,7 +69,7 @@ public class ArrayTests
     [Fact]
     void FindLastIndexi_Found()
     {
-        var source = Block.Create("a", "b", "b", "c");
+        var source = ValueArray.Create("a", "b", "b", "c");
         var expected = new[] { ("c", 3), ("b", 2) };
         var actual = new List<(string, int)>();
         var idx = source.FindLastIndex((item, i) =>
@@ -84,7 +84,7 @@ public class ArrayTests
     [Fact]
     void FindIndex_NotFound()
     {
-        var source = Block.Create("a", "b", "b", "c");
+        var source = ValueArray.Create("a", "b", "b", "c");
         var expected = source.ToArray();
         var actual = new List<string>();
         var idx = source.FindIndex(item =>
@@ -99,7 +99,7 @@ public class ArrayTests
     [Fact]
     void FindIndex_Found()
     {
-        var source = Block.Create("a", "b", "b", "c");
+        var source = ValueArray.Create("a", "b", "b", "c");
         var expected = new[] { "a", "b" };
         var actual = new List<string>();
         var idx = source.FindIndex(item =>
@@ -114,7 +114,7 @@ public class ArrayTests
     [Fact]
     void FindLastIndex_NotFound()
     {
-        var source = Block.Create("a", "b", "b", "c");
+        var source = ValueArray.Create("a", "b", "b", "c");
         var expected = new[] { "c", "b", "b", "a" };
         var actual = new List<string>();
         var idx = source.FindLastIndex(item =>
@@ -129,7 +129,7 @@ public class ArrayTests
     [Fact]
     void FindLastIndex_Found()
     {
-        var source = Block.Create("a", "b", "b", "c");
+        var source = ValueArray.Create("a", "b", "b", "c");
         var expected = new[] { "c", "b" };
         var actual = new List<string>();
         var idx = source.FindLastIndex(item =>

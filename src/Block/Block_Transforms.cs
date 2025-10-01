@@ -5,19 +5,19 @@ using ValueCollections.Unsafe;
 
 namespace ValueCollections;
 
-public partial class Block<T>
+public partial class ValueArray<T>
 {
     // General ideas:
     // Try to rely on LINQ where it makes sense, but benchmark for important things that could benefit from optimization.
     // e.g. sorting, filtering
 
-    // Do NOT have a method called Add(T), because that enables `new Block<T> { 1, 2, 3 }` which would not work.
+    // Do NOT have a method called Add(T), because that enables `new ValueArray<T> { 1, 2, 3 }` which would not work.
 
     // I'm not a huge fan of the Remove(T item), Remove(T[] items) methods on ImmutableArray, they only remove the first occurence
     // and that's counter-intuitive to me. Should be called RemoveFirst. And then are they that useful?
     // We have Where for general-purpose filtering.
     // RemoveAll has an optimization where it builds a set of indices to remove, then it's able to allocate a single result array.
-    // Seems only useful for arrays of structs. Should benchmark it on general cases vs .Where().ToBlock().
+    // Seems only useful for arrays of structs. Should benchmark it on general cases vs .Where().ToValueArray().
 
 
     /// <summary>
@@ -26,48 +26,48 @@ public partial class Block<T>
     /// </summary>
     /// <param name="start">The index of the first element in the source array to include in the resulting array.</param>
     /// <param name="length">The number of elements from the source array to include in the resulting array.</param>
-    public Block<T> Slice(int start, int length) =>
+    public ValueArray<T> Slice(int start, int length) =>
         new(ImmutableArray.Create(_arr, start, length));
 
     /// <inheritdoc cref="ImmutableArray{T}.Add(T)"/>
-    public Block<T> Add(T item) =>
-        ValueCollectionsMarshal.AsBlock([.. _arr, item]);
+    public ValueArray<T> Add(T item) =>
+        ValueCollectionsMarshal.AsValueArray([.. _arr, item]);
 
     // TODO consider adding a ReadOnlySpan overload
 
     /// <inheritdoc cref="ImmutableArray{T}.AddRange(IEnumerable{T})"/>
-    public Block<T> AddRange(IEnumerable<T> items) =>
-        ValueCollectionsMarshal.AsBlock([.. _arr, ..items]);
+    public ValueArray<T> AddRange(IEnumerable<T> items) =>
+        ValueCollectionsMarshal.AsValueArray([.. _arr, ..items]);
 
     /// <inheritdoc cref="ImmutableArray{T}.AddRange(ImmutableArray{T})"/>
-    public Block<T> AddRange(Block<T> items) =>
+    public ValueArray<T> AddRange(ValueArray<T> items) =>
         items.Length == 0 
             ? this 
-            : ValueCollectionsMarshal.AsBlock([.. _arr, ..items._arr]);
+            : ValueCollectionsMarshal.AsValueArray([.. _arr, ..items._arr]);
 
     /// <inheritdoc cref="ImmutableArray{T}.Insert(int, T)"/>
     /// <exception cref="IndexOutOfRangeException"/>
-    public Block<T> Insert(int index, T item)
+    public ValueArray<T> Insert(int index, T item)
     {
         ThrowIfIndexInvalidForInsert(index);
         var elementsBefore = _arr.AsSpan(0, index);
         var elementsAfter = _arr.AsSpan(index, _arr.Length - index);
-        return ValueCollectionsMarshal.AsBlock([.. elementsBefore, item, .. elementsAfter]);
+        return ValueCollectionsMarshal.AsValueArray([.. elementsBefore, item, .. elementsAfter]);
     }
 
     /// <inheritdoc cref="ImmutableArray{T}.InsertRange(int, IEnumerable{T})"/>
     /// <exception cref="IndexOutOfRangeException"/>
-    public Block<T> InsertRange(int index, IEnumerable<T> items)
+    public ValueArray<T> InsertRange(int index, IEnumerable<T> items)
     {
         ThrowIfIndexInvalidForInsert(index);
         var elementsBefore = _arr.AsSpan(0, index);
         var elementsAfter = _arr.AsSpan(index, _arr.Length - index);
-        return ValueCollectionsMarshal.AsBlock([..elementsBefore, ..items, ..elementsAfter]);
+        return ValueCollectionsMarshal.AsValueArray([..elementsBefore, ..items, ..elementsAfter]);
     }
 
     /// <inheritdoc cref="ImmutableArray{T}.InsertRange(int, ImmutableArray{T})"/>
     /// <exception cref="IndexOutOfRangeException"/>
-    public Block<T> InsertRange(int index, Block<T> items)
+    public ValueArray<T> InsertRange(int index, ValueArray<T> items)
     {
         if (items.Length == 0)
         {
@@ -77,13 +77,13 @@ public partial class Block<T>
         ThrowIfIndexInvalidForInsert(index);
         var elementsBefore = _arr.AsSpan(0, index);
         var elementsAfter = _arr.AsSpan(index, _arr.Length - index);
-        return ValueCollectionsMarshal.AsBlock([.. elementsBefore, ..items, ..elementsAfter]);
+        return ValueCollectionsMarshal.AsValueArray([.. elementsBefore, ..items, ..elementsAfter]);
     }
-    //_arr.InsertRange(index, items._arr).ToBlock();
+    //_arr.InsertRange(index, items._arr).ToValueArray();
 
     /// <inheritdoc cref="ImmutableArray{T}.RemoveAt(int)"/>
     /// <exception cref="IndexOutOfRangeException"/>
-    public Block<T> RemoveAt(int index)
+    public ValueArray<T> RemoveAt(int index)
     {
         ThrowIndexOfOutRangeIfNotInBounds(index);
         if (_arr.Length == 1)
@@ -93,17 +93,17 @@ public partial class Block<T>
 
         var elementsBefore = _arr.AsSpan(0, index);
         var elementsAfter = _arr.AsSpan(index + 1, _arr.Length - index - 1);
-        return ValueCollectionsMarshal.AsBlock([.. elementsBefore, .. elementsAfter]);
+        return ValueCollectionsMarshal.AsValueArray([.. elementsBefore, .. elementsAfter]);
     }
 
     /// <inheritdoc cref="ImmutableArray{T}.SetItem(int, T)"/>
     /// <exception cref="IndexOutOfRangeException"/>
-    public Block<T> SetItem(int index, T item)
+    public ValueArray<T> SetItem(int index, T item)
     {
         ThrowIndexOfOutRangeIfNotInBounds(index);
         var elementsBefore = _arr.AsSpan(0, index);
         var elementsAfter = _arr.AsSpan(index + 1, _arr.Length - index - 1);
-        return ValueCollectionsMarshal.AsBlock([.. elementsBefore, item, .. elementsAfter]);
+        return ValueCollectionsMarshal.AsValueArray([.. elementsBefore, item, .. elementsAfter]);
     }
 
 
