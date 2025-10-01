@@ -54,13 +54,13 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Block\ValueCollections.ValueArray.csproj">
-      <Project>{7fa6e721-18cd-43d9-808f-33363e0a902d}</Project>
-      <Name>ValueCollections.ValueArray</Name>
-    </ProjectReference>
+    <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Properties\" />
+    <ProjectReference Include="..\..\src\ValueArray\ValueCollections.ValueArray.csproj">
+      <Project>{14103d5a-b42b-19c6-31c2-790fa4c8cdb7}</Project>
+      <Name>ValueCollections.ValueArray</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

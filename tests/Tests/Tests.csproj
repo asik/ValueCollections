@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Block\ValueCollections.ValueArray.csproj" />
+    <ProjectReference Include="..\..\src\ValueArray\ValueCollections.ValueArray.csproj" />
   </ItemGroup>
 
 </Project>
