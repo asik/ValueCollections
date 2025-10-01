@@ -11,20 +11,6 @@ namespace Tests;
 
 public class CreationTests
 {
-    // TODO should we just make all constructors internal?
-
-    [Fact]
-    void ConstructorFromEnumerable() =>
-        Assert.Equal(
-            ValueArray.Create(1, 2, 3),
-            new ValueArray<int>(Enumerable.Range(1, 3)));
-
-    [Fact]
-    void ConstructorFromList() =>
-        Assert.Equal(
-            ValueArray.Create(1, 2, 3),
-            new ValueArray<int>(new List<int> { 1, 2, 3 }));
-
     [Fact]
     void CreateRangeFromEnumerable() =>
         Assert.Equal(

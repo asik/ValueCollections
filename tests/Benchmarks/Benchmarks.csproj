@@ -11,4 +11,8 @@
     <PackageReference Include="BenchmarkDotNet" Version="0.15.3" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\ValueArray\ValueCollections.ValueArray.csproj" />
+  </ItemGroup>
+
 </Project>

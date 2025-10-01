@@ -31,28 +31,28 @@ public partial class ValueArray<T>
     /// Creates a new <see cref="ValueArray{T}"/> from a sequence of items.
     /// </summary>
     /// <param name="items">The elements to store in the array.</param>
-    public ValueArray(IEnumerable<T> items) =>
+    internal ValueArray(IEnumerable<T> items) =>
         _arr = [.. items];
 
     /// <summary>
     /// Creates a new <see cref="ValueArray{T}"/> from a sequence of items.
     /// </summary>
     /// <param name="items">The elements to store in the array.</param>
-    public ValueArray(IReadOnlyCollection<T> items) =>
+    internal ValueArray(IReadOnlyCollection<T> items) =>
         _arr = [.. items];
 
     /// <summary>
     /// Creates a new <see cref="ValueArray{T}"/> from a <see cref="ReadOnlySpan{T}"/>.
     /// </summary>
     /// <param name="items">The elements to store in the array.</param>
-    public ValueArray(ReadOnlySpan<T> items) =>
+    internal ValueArray(ReadOnlySpan<T> items) =>
         _arr = [.. items];
 
     /// <summary>
     /// Creates a new <see cref="ValueArray{T}"/> from an <see cref="ImmutableArray{T}"/>.
     /// </summary>
     /// <param name="items">The elements to store in the array.</param>
-    public ValueArray(ImmutableArray<T> items) =>
+    internal ValueArray(ImmutableArray<T> items) =>
         _arr = items.IsDefaultOrEmpty
             ? []
             // It's safe to extract the underlying array since we won't mutate it either

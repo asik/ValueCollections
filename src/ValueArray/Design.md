@@ -1,24 +1,3 @@
-## `ImmutableArray` vs `ImmutableList` as an implementation
-
-Should we be based on `ImmutableArray` or `ImmutableList`? After all, we're going to support IImmutableList,
-and `ImmutableList` is a better type for that purpose, optimized for adding/removing.
-
-Why select a type that's going to be slow on updates if we want to support updates?
-
-Rationale: if update performance is important, are you going to be happy with `ImmutableList`?
-Or are you going to choose `List<T>` or `T[]` or something imperative.
-
-I think the vast majority of use cases for this type will be simple updates where a single array allocation is fine.
-
-For lots of updates where perf matters, you can use something mutable.
-
-Advantages of `ImmutableArray` that we would lose by going to `ImmutableList`:
-- Consistency with planned F# ValueArray type
-- Array-like performance in creation, iteration
-- 0 GC overhead over the underlying array (less overhead than `List<T>`!)
-
-So it should be based on `ImmutableArray`.
-
 ## Reference vs Value type
 
 Should it be a reference type or a value type?
@@ -39,3 +18,15 @@ creates more GC pressure, leading to more frequent GC. However, this is true of 
 plain arrays.
 
 Overall, making it a reference type is the better solution.
+
+## Should we expose constructors?
+
+1. We don't want to allow this syntax:
+```
+new ValueArray() { 1, 2, 3 }
+```
+
+We do want a method `Add` like `ImmutableArray` and `List`.
+
+We don't have a default constructor, but it'd be probably less confusing to have no constructors altogether so people are less likely to be tempted to use that syntax that can't ever be supported.
+
