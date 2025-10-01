@@ -126,6 +126,30 @@ public partial class ValueArray<T>
 
         return $"ValueArray({Length}) {elementString}";
     }
+
+    /// <summary>
+    /// Creates a <see cref="ReadOnlySpan{T}"/> over the underlying array.
+    /// </summary>
+    public ReadOnlySpan<T> AsReadOnlySpan() =>
+        _arr.AsSpan();
+
+    /// <summary>
+    /// Creates a <see cref="ReadOnlySpan{T}"/> over the underlying array, 
+    /// starting at a specified index.
+    /// </summary>
+    /// <param name="start">The zero-based index of the first element to include.</param>
+    public ReadOnlySpan<T> AsReadOnlySpan(int start) =>
+        _arr.AsSpan(start);
+
+
+    /// <summary>
+    /// Creates a <see cref="ReadOnlySpan{T}"/> over the underlying array, 
+    /// starting at a specified index and including a specified number of elements.
+    /// </summary>
+    /// <param name="start">The zero-based index of the first element to include.</param>
+    /// <param name="length">The number of elements to include.</param>
+    public ReadOnlySpan<T> AsReadOnlySpan(int start, int length) =>
+        _arr.AsSpan(start, length);
 }
 
 /// <summary>

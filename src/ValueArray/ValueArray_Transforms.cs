@@ -47,7 +47,7 @@ public partial class ValueArray<T>
             : ValueCollectionsMarshal.AsValueArray([.. _arr, ..items._arr]);
 
     /// <inheritdoc cref="ImmutableArray{T}.Insert(int, T)"/>
-    /// <exception cref="IndexOutOfRangeException"/>
+    /// <exception cref="ArgumentOutOfRangeException"/>
     public ValueArray<T> Insert(int index, T item)
     {
         ThrowIfIndexInvalidForInsert(index);
@@ -57,7 +57,7 @@ public partial class ValueArray<T>
     }
 
     /// <inheritdoc cref="ImmutableArray{T}.InsertRange(int, IEnumerable{T})"/>
-    /// <exception cref="IndexOutOfRangeException"/>
+    /// <exception cref="ArgumentOutOfRangeException"/>
     public ValueArray<T> InsertRange(int index, IEnumerable<T> items)
     {
         ThrowIfIndexInvalidForInsert(index);
@@ -67,7 +67,7 @@ public partial class ValueArray<T>
     }
 
     /// <inheritdoc cref="ImmutableArray{T}.InsertRange(int, ImmutableArray{T})"/>
-    /// <exception cref="IndexOutOfRangeException"/>
+    /// <exception cref="ArgumentOutOfRangeException"/>
     public ValueArray<T> InsertRange(int index, ValueArray<T> items)
     {
         if (items.Length == 0)
@@ -75,18 +75,19 @@ public partial class ValueArray<T>
             return this;
         }
 
+        ReadOnlySpan<int> span = new[] { 1, 2, 3 };// ImmutableArray.Create(1, 2, 3);
+
         ThrowIfIndexInvalidForInsert(index);
         var elementsBefore = _arr.AsSpan(0, index);
         var elementsAfter = _arr.AsSpan(index, _arr.Length - index);
         return ValueCollectionsMarshal.AsValueArray([.. elementsBefore, ..items, ..elementsAfter]);
     }
-    //_arr.InsertRange(index, items._arr).ToValueArray();
 
     /// <inheritdoc cref="ImmutableArray{T}.RemoveAt(int)"/>
-    /// <exception cref="IndexOutOfRangeException"/>
+    /// <exception cref="ArgumentOutOfRangeException"/>
     public ValueArray<T> RemoveAt(int index)
     {
-        ThrowIndexOfOutRangeIfNotInBounds(index);
+        ThrowOutRangeIfNotInBounds(index);
         if (_arr.Length == 1)
         {
             return Empty;
@@ -98,10 +99,10 @@ public partial class ValueArray<T>
     }
 
     /// <inheritdoc cref="ImmutableArray{T}.SetItem(int, T)"/>
-    /// <exception cref="IndexOutOfRangeException"/>
+    /// <exception cref="ArgumentOutOfRangeException"/>
     public ValueArray<T> SetItem(int index, T item)
     {
-        ThrowIndexOfOutRangeIfNotInBounds(index);
+        ThrowOutRangeIfNotInBounds(index);
         var elementsBefore = _arr.AsSpan(0, index);
         var elementsAfter = _arr.AsSpan(index + 1, _arr.Length - index - 1);
         return ValueCollectionsMarshal.AsValueArray([.. elementsBefore, item, .. elementsAfter]);
@@ -128,15 +129,15 @@ public partial class ValueArray<T>
     {
         if (index < 0 || index > _arr.Length)
         {
-            throw new IndexOutOfRangeException();
+            throw new ArgumentOutOfRangeException();
         }
     }
 
-    void ThrowIndexOfOutRangeIfNotInBounds(int index)
+    void ThrowOutRangeIfNotInBounds(int index)
     {
         if (index < 0 || index >= _arr.Length)
         {
-            throw new IndexOutOfRangeException();
+            throw new ArgumentOutOfRangeException();
         }
     }
 }

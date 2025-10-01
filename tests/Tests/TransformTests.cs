@@ -121,12 +121,12 @@ public class TransformTests
 
     [Fact]
     void InsertBeyondEndThrows() =>
-        Assert.Throws<IndexOutOfRangeException>(() =>
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
             ValueArray.Create(0, 1, 2).Insert(4, 3));
 
     [Fact]
     void InsertAtNegativeIndexThrows() =>
-        Assert.Throws<IndexOutOfRangeException>(() =>
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
             ValueArray.Create(0, 1, 2).Insert(-1, -1));
 
     [Fact]
@@ -149,12 +149,12 @@ public class TransformTests
 
     [Fact]
     void RemoveBeyondEndThrows() =>
-        Assert.Throws<IndexOutOfRangeException>(() => 
+        Assert.Throws<ArgumentOutOfRangeException>(() => 
             ValueArray.Create(1, 2, 3).RemoveAt(3));
 
     [Fact]
     void RemoveAtNegativeIndexThrows() =>
-        Assert.Throws<IndexOutOfRangeException>(() =>
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
             ValueArray.Create(1, 2, 3).RemoveAt(-1));
 
     [Fact]
@@ -165,17 +165,17 @@ public class TransformTests
 
     [Fact]
     void SetItemOnEmptyArrayThrows() =>
-        Assert.Throws<IndexOutOfRangeException>(() => 
+        Assert.Throws<ArgumentOutOfRangeException>(() => 
             ValueArray<string>.Empty.SetItem(0, "a"));
 
     [Fact]
     void SetItemOnNegativeIndexThrows() =>
-        Assert.Throws<IndexOutOfRangeException>(() =>
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
             ValueArray.Create(1, 2, 3).SetItem(-1, 94));
 
     [Fact]
     void SetItemBeyondEndIndexThrows() =>
-        Assert.Throws<IndexOutOfRangeException>(() =>
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
             ValueArray.Create(1, 2, 3).SetItem(3, 94));
 
     [Fact]

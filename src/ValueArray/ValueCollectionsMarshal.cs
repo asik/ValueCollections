@@ -1,4 +1,6 @@
-﻿namespace ValueCollections.Unsafe;
+﻿using System.Collections.Generic;
+
+namespace ValueCollections.Unsafe;
 
 /// <summary>
 /// An unsafe class that provides a set of methods to access the underlying data representations of value collections.

@@ -30,3 +30,5 @@ We do want a method `Add` like `ImmutableArray` and `List`.
 
 We don't have a default constructor, but it'd be probably less confusing to have no constructors altogether so people are less likely to be tempted to use that syntax that can't ever be supported.
 
+## Should we expose a ValueArray.Builder class like ImmutableArray>?
+
