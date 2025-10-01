@@ -30,5 +30,23 @@ We do want a method `Add` like `ImmutableArray` and `List`.
 
 We don't have a default constructor, but it'd be probably less confusing to have no constructors altogether so people are less likely to be tempted to use that syntax that can't ever be supported.
 
-## Should we expose a ValueArray.Builder class like ImmutableArray>?
+## Should we expose a `Builder` class like `ImmutableArray`?
+
+Right now there's no good way to avoid a copy when creating a `ValueArray`, unless what you're starting with is an array.
+The nice-looking code path:
+
+```csharp
+var list = new List<T>();
+// build your list imperatively
+ValueArray<T> arr = [.. list];
+```
+...incurs *two* redundant copies! First the implicit `List.ToArray()`, then this is passed to a `ReadOnlySpan` overload of `CreateRange` which has no choice but to allocate and copy again.
+
+Your can eliminate one of these copies by using `ValueCollectionsMarshal`, but that's not great since:
+- You're still incurring a copy - in `List<T>.ToArray()`
+- I end up pushing people to use an unsafe type not designed for general use
+
+Adding a `Builder` class in the `ValueCollections` namespace avoids all that:
+- We can reuse the `Builder`'s array directly, avoiding any copy
+- There's much less chance of people misusing `Builder` and causing subtle mutation bugs.
 
