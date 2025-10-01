@@ -35,6 +35,6 @@ public class IReadOnlyListTests
 
     [Fact]
     void ForEach_IsStructEnumerator() =>
-        Assert.True(_block.GetEnumerator().GetType().IsValueType);
+        Assert.True(Block<int>.Empty.GetEnumerator().GetType().IsValueType);
 
 }

@@ -30,7 +30,6 @@ public class TransformTests
 
     [Fact]
     void AddCollectionOfCollections() =>
-        // Resolves to the right .Add overload
         Assert.Equal(
             Block.Create(1, 2, 3, 4),
             Block.Create(new[] { 1 }, new[] { 2 })
