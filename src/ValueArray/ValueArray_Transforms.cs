@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using ValueCollections.Unsafe;
 
 namespace ValueCollections;
@@ -106,6 +107,22 @@ public partial class ValueArray<T>
         return ValueCollectionsMarshal.AsValueArray([.. elementsBefore, item, .. elementsAfter]);
     }
 
+    /// <summary>
+    /// Sorts the array, according to the specified comparer, or to the default comparer if none is provided.
+    /// </summary>
+    /// <param name="comparer">An optional comparer to use when comparing elements. If null, the default comparer for type T is used.</param>
+    /// <returns>A new <see cref="ValueArray{T}"/> with the elements sorted.</returns>
+    public ValueArray<T> Sort(IComparer<T>? comparer = null)
+    {
+        if (Count == 0)
+        {
+            return Empty;
+        }
+
+        var arrCopy = _arr.ToArray();
+        Array.Sort(arrCopy, comparer ?? Comparer<T>.Default);
+        return ValueCollectionsMarshal.AsValueArray(arrCopy);
+    }
 
     void ThrowIfIndexInvalidForInsert(int index)
     {

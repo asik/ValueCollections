@@ -201,4 +201,34 @@ public class TransformTests
         var edited = original.SetItem(2, -2);
         Assert.Equal(ValueArray.Create(1, 2, -2), edited);
     }
+
+    [Fact]
+    void SortDefaultSortsAscending()
+    {
+        var original = ValueArray.Create(4, 2, 6, 4);
+        var sorted = original.Sort();
+        Assert.Equal(ValueArray.Create(2, 4, 4, 6), sorted);
+    }
+
+    [Fact]
+    void SortWithCustomComparer()
+    {
+        var comparer = new CustomComparer<int>((a, b) => b.CompareTo(a));
+        var original = ValueArray.Create(4, 2, 6, 4);
+        var sorted = original.Sort(comparer);
+        Assert.Equal(ValueArray.Create(6, 4, 4, 2), sorted);
+    }
+
+    [Fact]
+    void SortEmptyReturnsSameInstance() =>
+        Assert.Same(
+            ValueArray<int>.Empty,
+            ValueArray<int>.Empty.Sort());
 }
+
+class CustomComparer<T>(Func<T, T, int> compare) : IComparer<T>
+{
+    public int Compare(T? x, T? y) => compare(x!, y!);
+}
+
+
