@@ -75,8 +75,6 @@ public partial class ValueArray<T>
             return this;
         }
 
-        ReadOnlySpan<int> span = new[] { 1, 2, 3 };// ImmutableArray.Create(1, 2, 3);
-
         ThrowIfIndexInvalidForInsert(index);
         var elementsBefore = _arr.AsSpan(0, index);
         var elementsAfter = _arr.AsSpan(index, _arr.Length - index);
